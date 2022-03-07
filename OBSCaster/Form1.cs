@@ -44,5 +44,10 @@ namespace OBSCaster {
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e) {
             this.Show();
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

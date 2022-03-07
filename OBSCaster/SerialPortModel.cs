@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 namespace OBSCaster {
     class SerialPortModel {
 
+        // Get the COM port associated with the USB VID and PID
         public static List<string> ComPortFromIDs(String VID, String PID) {
             RegistryKey rk1 = Registry.LocalMachine;
             RegistryKey rk2 = rk1.OpenSubKey("SYSTEM\\CurrentControlSet\\Enum");
