@@ -13,14 +13,25 @@ namespace OBSCaster {
         }
 
         private void Form1_Load(object sender, EventArgs e) {
+            this.tbSettingsConsole.Items.AddRange(new string[] {
+                "Newtek Mini Control Surface",
+                "Newtek RS-8",
+            });
+            this.tbSettingsConsole.SelectedIndex = 0;
+            this.tbSettingsBacklight.Items.AddRange(new string[] {
+                "Off",
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+            });
+            this.tbSettingsBacklight.SelectedIndex = 0;
             var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
             Console.WriteLine($"Com port: {ports[0]}");
-            this.sp = new SerialPort(ports[0], 9600);
-            this.sp.NewLine = "\r";
-            this.sp.Open();
-            this.sp.WriteLine("00FF");
-            this.sp.Close();
-            Console.WriteLine("hi");
 
         }
 
@@ -45,7 +56,7 @@ namespace OBSCaster {
             this.Show();
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void tbSettingsBacklight_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
