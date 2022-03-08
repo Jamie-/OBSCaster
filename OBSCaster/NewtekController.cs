@@ -17,5 +17,9 @@ namespace OBSCaster {
         public bool IsConnected() {
             return this.connected;
         }
+
+        public abstract bool supportsBacklight();
+
+        public abstract void setBacklight(int level);
     }
 }
