@@ -41,12 +41,13 @@
             this.tbSettingsConsole = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.bConnect = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -117,6 +118,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.bConnect);
             this.groupBox1.Controls.Add(this.tbSettingsConsole);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
@@ -136,6 +138,7 @@
             this.tbSettingsConsole.Name = "tbSettingsConsole";
             this.tbSettingsConsole.Size = new System.Drawing.Size(121, 21);
             this.tbSettingsConsole.TabIndex = 4;
+            this.tbSettingsConsole.SelectedIndexChanged += new System.EventHandler(this.tbSettingsConsole_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -160,6 +163,23 @@
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "OBS Settings";
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Location = new System.Drawing.Point(62, 52);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.TabIndex = 6;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            4444,
+            0,
+            0,
+            0});
             // 
             // label5
             // 
@@ -203,22 +223,15 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "IP";
             // 
-            // numericUpDown1
+            // bConnect
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(62, 52);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown1.TabIndex = 6;
-            this.numericUpDown1.Value = new decimal(new int[] {
-            4444,
-            0,
-            0,
-            0});
+            this.bConnect.Location = new System.Drawing.Point(6, 83);
+            this.bConnect.Name = "bConnect";
+            this.bConnect.Size = new System.Drawing.Size(188, 23);
+            this.bConnect.TabIndex = 5;
+            this.bConnect.Text = "Connect";
+            this.bConnect.UseVisualStyleBackColor = true;
+            this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
             // 
             // Form1
             // 
@@ -261,6 +274,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.Button bConnect;
     }
 }
 

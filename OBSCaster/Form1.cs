@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace OBSCaster {
     public partial class Form1 : Form {
-        private SerialPort sp;
+        private NewtekController controller;
 
         public Form1() {
             InitializeComponent();
@@ -35,15 +35,23 @@ namespace OBSCaster {
 
         }
 
+        // Handle exit
         private void ctxMenuExit_Click(object sender, EventArgs e) {
+            if (this.controller != null && this.controller.IsConnected()) {
+                Console.WriteLine("Disconnecting before shutdown...");
+                this.controller.disconnect();
+            }
             Application.Exit();
         }
 
+        // Show form on context menu settings
         private void ctxMenuSettingsClick(object sender, EventArgs e) {
             this.Show();
         }
 
+        // Handle settings form close
         private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
+            // Keep notify icon in tray until we exit via the notify context menu
             if (e.CloseReason == CloseReason.UserClosing) {
                 e.Cancel = true;
                 this.Hide();
@@ -52,13 +60,54 @@ namespace OBSCaster {
             }
         }
 
+        // Handle settings form open
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e) {
             this.Show();
         }
 
         private void tbSettingsBacklight_SelectedIndexChanged(object sender, EventArgs e)
         {
+            
+        }
 
+        // Change device type
+        private void tbSettingsConsole_SelectedIndexChanged(object sender, EventArgs e) {
+            ComboBox tbSettingsConsole = (ComboBox) sender;
+            if (this.controller != null && this.controller.IsConnected()) {
+                this.controller.disconnect();
+            }
+            if (tbSettingsConsole.SelectedItem.ToString() == NewtekMiniController.deviceName()) {
+                this.controller = new NewtekMiniController();
+                if (this.controller.supportsBacklight()) {
+
+                }
+            }
+        }
+
+        // Connect and disconnect serial port
+        private void bConnect_Click(object sender, EventArgs e) {
+            Button bConnect = (Button) sender;
+            if (this.controller == null) {
+                MessageBox.Show("Controller type must be set to connect!");
+                return;
+            }
+            if (this.controller.IsConnected()) {
+                bConnect.Enabled = false;
+                Console.WriteLine("Disconnecting...");
+                this.controller.disconnect();
+                bConnect.Text = "Connect";
+                bConnect.Enabled = true;
+            } else {
+                bConnect.Enabled = false;
+                Console.WriteLine("Connecting...");
+                this.controller.connect();
+                if (this.controller.supportsBacklight()) {
+                    // TODO: set the backlight here to the value from tbSettingsBacklight
+                    this.controller.setBacklight(7);
+                }
+                bConnect.Text = "Disconnect";
+                bConnect.Enabled = true;
+            }
         }
     }
 }
