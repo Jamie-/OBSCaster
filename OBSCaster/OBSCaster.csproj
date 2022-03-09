@@ -75,6 +75,7 @@
     </Compile>
     <Compile Include="NewtekController.cs" />
     <Compile Include="NewtekMiniController.cs" />
+    <Compile Include="NewTekRS-8.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerialPortModel.cs" />
