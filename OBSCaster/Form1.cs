@@ -10,6 +10,22 @@ namespace OBSCaster {
             InitializeComponent();
             notifyIcon1.Icon = Properties.Resources.pizza;
 
+            // Register for USB device connects and disconnects
+            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+        }
+
+        protected override void WndProc(ref Message m) {
+            base.WndProc(ref m);
+            if (m.Msg == UsbNotification.WmDevicechange) {
+                switch ((int)m.WParam) {
+                    case UsbNotification.DbtDeviceremovecomplete:
+						Console.WriteLine($"USB Device removed!!");
+                        break;
+                    case UsbNotification.DbtDevicearrival:
+                        Console.WriteLine($"USB Device connected!!");
+                        break;
+                }
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e) {
