@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace OBSCaster {
-	class NewTekRS_8 {
+	class NewTekRS_8: NewtekController {
 		private SerialPort port;
 		private int[] buttonData = { 0,  0xff , 0xff , 0xff , 0x00, 0x00, 0x00, 0x00};
 		private int[] ledData = { 0xff, 0xff, 0xff };
@@ -31,8 +31,20 @@ namespace OBSCaster {
 			port.Open();
 		}
 
-		public void close() {
-			port.Close();
+		public override void connect() {
+			if (!port.IsOpen) port.Open();
+		}
+
+		public override void disconnect() {
+			if (port.IsOpen) port.Close();
+		}
+
+		public override bool supportsBacklight() {
+			return false;
+		}
+
+		public override void setBacklight(int level) {
+			throw new NotImplementedException();
 		}
 
 		private void dataReceivedHandler(object sender, SerialDataReceivedEventArgs e) {
