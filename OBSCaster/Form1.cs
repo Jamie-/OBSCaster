@@ -5,10 +5,18 @@ using System.Windows.Forms;
 namespace OBSCaster {
     public partial class Form1 : Form {
         private NewtekController controller;
+        private SerialPort sp;
+        private NewTekRS_8 device;
+        private int temp=1;
 
         public Form1() {
             InitializeComponent();
             notifyIcon1.Icon = Properties.Resources.pizza;
+            var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
+            if (ports.Count>0) {
+                device = new NewTekRS_8(ports[0]);
+                device.vegasStart();
+            }
 
             // Register for USB device connects and disconnects
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
@@ -48,7 +56,14 @@ namespace OBSCaster {
             this.tbSettingsBacklight.SelectedIndex = 0;
             var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
             Console.WriteLine($"Com port: {ports[0]}");
-
+            
+            //Console.WriteLine($"Com port: {ports[0]}");
+            //this.sp = new SerialPort(ports[0], 9600);
+            //this.sp.NewLine = "\r";
+            //this.sp.Open();
+            //this.sp.WriteLine("00FF");
+            //this.sp.Close();
+            //Console.WriteLine("hi");
         }
 
         // Handle exit
