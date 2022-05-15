@@ -22,20 +22,23 @@ namespace OBSCaster {
 			{7, "Take" }
 		};
 
-		public NewTekRS_8(string serialPort) {
-			port = new SerialPort(serialPort);
+		public NewTekRS_8() {
+			Console.WriteLine("Created new NewTekRS_8 instance");
+		}
+
+		public static string deviceName() {
+			return "Newtek RS-8";
+        }
+
+		protected override void _connect(string serialPortName) {
+			port = new SerialPort(serialPortName);
 			port.BaudRate = 115200;
 			port.NewLine = "\r";
 			port.DataReceived += new SerialDataReceivedEventHandler(dataReceivedHandler);
-			Console.WriteLine("Created new NewTekRS_8 instance");
 			port.Open();
 		}
 
-		public override void connect() {
-			if (!port.IsOpen) port.Open();
-		}
-
-		public override void disconnect() {
+		protected override void _disconnect() {
 			if (port.IsOpen) port.Close();
 		}
 

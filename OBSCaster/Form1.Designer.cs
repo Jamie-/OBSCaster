@@ -38,7 +38,8 @@
             this.tbSettingsBacklight = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.tbSettingsConsole = new System.Windows.Forms.ComboBox();
+            this.bConnect = new System.Windows.Forms.Button();
+            this.tbSettingsConsoleType = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -47,7 +48,6 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.bConnect = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -119,7 +119,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.bConnect);
-            this.groupBox1.Controls.Add(this.tbSettingsConsole);
+            this.groupBox1.Controls.Add(this.tbSettingsConsoleType);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.tbSettingsBacklight);
@@ -130,15 +130,25 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Console Settings";
             // 
-            // tbSettingsConsole
+            // bConnect
             // 
-            this.tbSettingsConsole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.tbSettingsConsole.FormattingEnabled = true;
-            this.tbSettingsConsole.Location = new System.Drawing.Point(73, 22);
-            this.tbSettingsConsole.Name = "tbSettingsConsole";
-            this.tbSettingsConsole.Size = new System.Drawing.Size(121, 21);
-            this.tbSettingsConsole.TabIndex = 4;
-            this.tbSettingsConsole.SelectedIndexChanged += new System.EventHandler(this.tbSettingsConsole_SelectedIndexChanged);
+            this.bConnect.Location = new System.Drawing.Point(6, 83);
+            this.bConnect.Name = "bConnect";
+            this.bConnect.Size = new System.Drawing.Size(188, 23);
+            this.bConnect.TabIndex = 5;
+            this.bConnect.Text = "Connect";
+            this.bConnect.UseVisualStyleBackColor = true;
+            this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
+            // 
+            // tbSettingsConsoleType
+            // 
+            this.tbSettingsConsoleType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.tbSettingsConsoleType.FormattingEnabled = true;
+            this.tbSettingsConsoleType.Location = new System.Drawing.Point(73, 22);
+            this.tbSettingsConsoleType.Name = "tbSettingsConsoleType";
+            this.tbSettingsConsoleType.Size = new System.Drawing.Size(121, 21);
+            this.tbSettingsConsoleType.TabIndex = 4;
+            this.tbSettingsConsoleType.SelectedIndexChanged += new System.EventHandler(this.tbSettingsConsoleType_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -223,16 +233,6 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "IP";
             // 
-            // bConnect
-            // 
-            this.bConnect.Location = new System.Drawing.Point(6, 83);
-            this.bConnect.Name = "bConnect";
-            this.bConnect.Size = new System.Drawing.Size(188, 23);
-            this.bConnect.TabIndex = 5;
-            this.bConnect.Text = "Connect";
-            this.bConnect.UseVisualStyleBackColor = true;
-            this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -251,6 +251,7 @@
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -265,7 +266,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.ComboBox tbSettingsConsole;
+        private System.Windows.Forms.ComboBox tbSettingsConsoleType;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox3;

@@ -5,18 +5,10 @@ using System.Windows.Forms;
 namespace OBSCaster {
     public partial class Form1 : Form {
         private NewtekController controller;
-        private SerialPort sp;
-        private NewTekRS_8 device;
-        private int temp=1;
 
         public Form1() {
             InitializeComponent();
             notifyIcon1.Icon = Properties.Resources.pizza;
-            var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
-            if (ports.Count>0) {
-                device = new NewTekRS_8(ports[0]);
-                device.vegasStart();
-            }
 
             // Register for USB device connects and disconnects
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
@@ -37,11 +29,11 @@ namespace OBSCaster {
         }
 
         private void Form1_Load(object sender, EventArgs e) {
-            this.tbSettingsConsole.Items.AddRange(new string[] {
+            this.tbSettingsConsoleType.Items.AddRange(new string[] {
                 "Newtek Mini Control Surface",
                 "Newtek RS-8",
             });
-            this.tbSettingsConsole.SelectedIndex = 0;
+            this.tbSettingsConsoleType.SelectedIndex = 0;
             this.tbSettingsBacklight.Items.AddRange(new string[] {
                 "Off",
                 "0",
@@ -102,16 +94,23 @@ namespace OBSCaster {
         }
 
         // Change device type
-        private void tbSettingsConsole_SelectedIndexChanged(object sender, EventArgs e) {
-            ComboBox tbSettingsConsole = (ComboBox) sender;
+        private void tbSettingsConsoleType_SelectedIndexChanged(object sender, EventArgs e) {
+            ComboBox tbSettingsConsoleType = (ComboBox) sender;
             if (this.controller != null && this.controller.IsConnected()) {
+                // TODO: if we pick the same controller type we shouldn't disconnect!
                 this.controller.disconnect();
             }
-            if (tbSettingsConsole.SelectedItem.ToString() == NewtekMiniController.deviceName()) {
+            // Set new controller type
+            if (tbSettingsConsoleType.SelectedItem.ToString() == NewtekMiniController.deviceName()) {
                 this.controller = new NewtekMiniController();
-                if (this.controller.supportsBacklight()) {
-
-                }
+            } else if (tbSettingsConsoleType.SelectedItem.ToString() == NewTekRS_8.deviceName()) {
+                this.controller = new NewTekRS_8();
+            }
+            // Enable/disable backlight settings depending on if supported or not
+            if (this.controller.supportsBacklight()) {
+                this.tbSettingsBacklight.Enabled = true;
+            } else {
+                this.tbSettingsBacklight.Enabled = false;
             }
         }
 
@@ -124,13 +123,11 @@ namespace OBSCaster {
             }
             if (this.controller.IsConnected()) {
                 bConnect.Enabled = false;
-                Console.WriteLine("Disconnecting...");
                 this.controller.disconnect();
                 bConnect.Text = "Connect";
                 bConnect.Enabled = true;
             } else {
                 bConnect.Enabled = false;
-                Console.WriteLine("Connecting...");
                 this.controller.connect();
                 if (this.controller.supportsBacklight()) {
                     // TODO: set the backlight here to the value from tbSettingsBacklight
