@@ -15,7 +15,7 @@ namespace OBSCaster {
 
         protected override void _connect(string serialPortName) {
             port = new SerialPort(serialPortName);
-            port.BaudRate = 115200;
+            port.BaudRate = 9600;
             port.NewLine = "\r";
             port.DataReceived += new SerialDataReceivedEventHandler(dataReceivedHandler);
             port.Open();
@@ -36,7 +36,7 @@ namespace OBSCaster {
 
         private void dataReceivedHandler(object sender, SerialDataReceivedEventArgs e) {
             SerialPort sp = (SerialPort)sender;
-            string data = sp.ReadExisting();
+            string data = sp.ReadLine();
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data);
             var hexString = BitConverter.ToString(bytes);
             Console.WriteLine($"Data received: {hexString}");
