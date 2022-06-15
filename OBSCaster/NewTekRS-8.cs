@@ -50,7 +50,7 @@ namespace OBSCaster {
 		private void dataReceivedHandler(object sender, SerialDataReceivedEventArgs e) {
 			SerialPort sp = (SerialPort)sender;
 			string data = sp.ReadExisting();
-			//Console.WriteLine($"Data received: {data}");
+			Console.WriteLine($"Data received: {data}");
 			var commands = data.Split('\r');
 			foreach (var command in commands) {
 				if (String.IsNullOrWhiteSpace(command)) continue;
@@ -61,6 +61,57 @@ namespace OBSCaster {
 
 		public void doSomething(string button) {
 			Console.WriteLine($"Button: {button}");
+			if (button.Contains("Pgm")) {
+				var butNum = int.Parse(button.Substring(3));
+				var translated = 0;
+				if (Vmix.outgoingInputLookup.TryGetValue(butNum, out translated)) {
+					new Thread(delegate () {
+						if (translated >= 100) {
+							Vmix.bodge(translated, 1);
+						} else {
+							Vmix.setProgram(translated);
+						}
+					}).Start();
+				}
+			}
+			if (button.Contains("Pvw")) {
+				var butNum = int.Parse(button.Substring(3));
+				var translated = 0;
+				if (Vmix.outgoingInputLookup.TryGetValue(butNum, out translated)) {
+					new Thread(delegate () {
+						if (translated >= 100) {
+							Vmix.bodge(translated, 0);
+						} else {
+							Vmix.setPreview(translated);
+						}
+					}).Start();
+				}
+			}
+			if (button=="FadeDSK") {
+				new Thread(delegate () {
+					Vmix.sendcompanion(12, 2); // fade in
+				}).Start();
+			}
+			if (button == "TakeDSK") {
+				new Thread(delegate () {
+					Vmix.sendcompanion(12, 18); // fade in + rec
+				}).Start();
+			}
+			if (button=="Take") {
+				new Thread(delegate () {
+					Vmix.cut();
+				}).Start();
+			}
+			if (button == "DDR") {
+				new Thread(delegate () {
+					Vmix.setoverlay1();
+				}).Start();
+			}
+			if (button == "Alt") {
+				new Thread(delegate () {
+					Vmix.setoverlay2();
+				}).Start();
+			}
 		}
 
 		private void decodeCommand(string command) {
@@ -107,6 +158,9 @@ namespace OBSCaster {
 					setOtherLED(Leds.UpT, false);
 					setOtherLED(Leds.DownT, true);
 				}
+				/*new Thread(delegate () {
+					Vmix.setTBar(buttons);
+				}).Start();*/
 			}
 			if (bank>4) {
 				// Rotary encoder
@@ -133,7 +187,7 @@ namespace OBSCaster {
 				}
 			}
 			port.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
-			Console.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
+			//Console.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
 		}
 		public void setProgramLED(int led, bool exclusive=true) {
 			setLED(led, 2, exclusive);

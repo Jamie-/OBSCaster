@@ -13,9 +13,19 @@ namespace OBSCaster {
             InitializeComponent();
             notifyIcon1.Icon = Properties.Resources.pizza;
             var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
-            if (ports.Count>0) {
-                device = new NewTekRS_8(ports[0]);
-                device.vegasStart();
+            foreach (var port in ports) {
+                try {
+                    try {
+                        device = new NewTekRS_8(port);
+                        device.vegasStart();
+                        Vmix vmix = new Vmix(device);
+                        break;
+                    } catch (System.UnauthorizedAccessException) {
+                        Console.WriteLine($"Failed to open {port}");
+                    }
+                } catch (System.IO.IOException e) {
+					Console.WriteLine($"Failed to open {port}");
+				}
             }
 
             // Register for USB device connects and disconnects
