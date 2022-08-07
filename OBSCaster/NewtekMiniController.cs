@@ -1,12 +1,17 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Threading;
 
 namespace OBSCaster {
     class NewtekMiniController : NewtekController {
         private SerialPort port;
+        private Thread readThread;
+        private bool _runReadThread;
+        private char[] readBuff;
+        private int readBuffPointer;
 
         public NewtekMiniController() {
-            Console.WriteLine("Created new NewtekMiniController instance");
+            // Console.WriteLine("Created new NewtekMiniController instance");
         }
 
         public static string deviceName() {
@@ -16,12 +21,45 @@ namespace OBSCaster {
         protected override void _connect(string serialPortName) {
             port = new SerialPort(serialPortName);
             port.BaudRate = 9600;
-            port.NewLine = "\r";
-            port.DataReceived += new SerialDataReceivedEventHandler(dataReceivedHandler);
+            port.ReadTimeout = 500;
+            port.WriteTimeout = 500;
             port.Open();
+            readThread = new Thread(readSerialPort);
+            _runReadThread = true;
+            readBuff = new char[4];
+            readBuffPointer = 0;
+            readThread.Start();
         }
 
+        // Internal serial read thread
+        private void readSerialPort() {
+            Console.WriteLine("Starting serial read thread...");
+            while (_runReadThread) {
+                try {
+                    Int32 chunk = port.ReadChar();
+                    if (readBuffPointer == 4) {
+                        if (chunk == 13) {
+                            // Dispatch event
+                            string cmd = new string(readBuff);
+                            decodeCommand(cmd);
+                        } else {
+                            // Got something weird - just reset the pointer and move on
+                            Console.WriteLine("Received malformed data!");
+                        }
+                        readBuffPointer = 0;
+                    } else {
+                        readBuff[readBuffPointer] = (char) chunk;
+                        readBuffPointer++;
+                    }
+                } catch (TimeoutException) { }
+            }
+            Console.WriteLine("Serial read thread exited!");
+        }
+
+        // Close internal read thread and serial port
         protected override void _disconnect() {
+            _runReadThread = false;
+            readThread.Join();
             port.Close();
         }
 
@@ -32,17 +70,6 @@ namespace OBSCaster {
         // Set backlight
         public override void setBacklight(int level) {
 
-        }
-
-        private void dataReceivedHandler(object sender, SerialDataReceivedEventArgs e) {
-            SerialPort sp = (SerialPort)sender;
-            string data = sp.ReadLine();
-            // TODO: need to check when data recv handler gets called - we may need to call multiple ReadLine()
-            // while bytestoread > 0 do a ReadLine
-            // byte[] bytes = System.Text.Encoding.UTF8.GetBytes(data);
-            // var hexString = BitConverter.ToString(bytes);
-            Console.WriteLine($"Data received: {data}");
-            this.decodeCommand(data);
         }
 
         private void decodeCommand(string command) {
