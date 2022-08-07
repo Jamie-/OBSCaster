@@ -35,7 +35,6 @@ namespace OBSCaster {
         // Disconnect from serial port
         public void disconnect() {
             Console.WriteLine("Disconnecting from controller...");
-
             this._disconnect();
             this.connected = false;
             Console.WriteLine("Controller disconnected!");

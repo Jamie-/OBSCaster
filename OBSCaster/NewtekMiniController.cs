@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Threading;
+using System.Diagnostics;
 
 namespace OBSCaster {
     class NewtekMiniController : NewtekController {
@@ -69,7 +70,9 @@ namespace OBSCaster {
 
         // Set backlight
         public override void setBacklight(int level) {
-
+            Console.WriteLine($"Setting backlight to level: {level}");
+            Debug.Assert(level >= 0 && level <= 7);
+            port.Write($"070{level}\r");
         }
 
         private void decodeCommand(string command) {

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO.Ports;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace OBSCaster {
     public partial class Form1 : Form {
@@ -34,17 +34,19 @@ namespace OBSCaster {
                 "Newtek RS-8",
             });
             this.tbSettingsConsoleType.SelectedIndex = 0;
-            this.tbSettingsBacklight.Items.AddRange(new string[] {
-                "Off",
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-            });
+            Dictionary<string, int> backlightDict = new Dictionary<string, int>() {
+                {"Off", 0},
+                {"1", 1},
+                {"2", 2},
+                {"3", 3},
+                {"4", 4},
+                {"5", 5},
+                {"6", 6},
+                {"7", 7},
+            };
+            this.tbSettingsBacklight.DataSource = new BindingSource(backlightDict, null);
+            this.tbSettingsBacklight.ValueMember = "Value";
+            this.tbSettingsBacklight.DisplayMember = "Key";
             this.tbSettingsBacklight.SelectedIndex = 0;
             var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
             Console.WriteLine($"Com port: {ports[0]}");
@@ -88,9 +90,12 @@ namespace OBSCaster {
             this.Show();
         }
 
+        // Set backlight on change
         private void tbSettingsBacklight_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
+            if (this.controller.IsConnected() && this.controller.supportsBacklight()) {
+                this.controller.setBacklight((int)tbSettingsBacklight.SelectedValue);
+            }
         }
 
         // Change device type
@@ -129,9 +134,9 @@ namespace OBSCaster {
             } else {
                 bConnect.Enabled = false;
                 this.controller.connect();
+                // Set backlight value after connect
                 if (this.controller.supportsBacklight()) {
-                    // TODO: set the backlight here to the value from tbSettingsBacklight
-                    this.controller.setBacklight(7);
+                    this.controller.setBacklight((int) tbSettingsBacklight.SelectedValue);
                 }
                 bConnect.Text = "Disconnect";
                 bConnect.Enabled = true;
