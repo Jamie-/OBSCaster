@@ -42,16 +42,16 @@
             this.tbSettingsConsoleType = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.tbHandlerPort = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.tbHandlerPassword = new System.Windows.Forms.TextBox();
+            this.tbHandlerIp = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tbHandlerPort)).BeginInit();
             this.SuspendLayout();
             // 
             // notifyIcon1
@@ -161,10 +161,10 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.numericUpDown1);
+            this.groupBox2.Controls.Add(this.tbHandlerPort);
             this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.textBox3);
-            this.groupBox2.Controls.Add(this.textBox1);
+            this.groupBox2.Controls.Add(this.tbHandlerPassword);
+            this.groupBox2.Controls.Add(this.tbHandlerIp);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Location = new System.Drawing.Point(218, 12);
@@ -174,18 +174,18 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "OBS Settings";
             // 
-            // numericUpDown1
+            // tbHandlerPort
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(62, 52);
-            this.numericUpDown1.Maximum = new decimal(new int[] {
+            this.tbHandlerPort.Location = new System.Drawing.Point(62, 52);
+            this.tbHandlerPort.Maximum = new decimal(new int[] {
             65535,
             0,
             0,
             0});
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown1.TabIndex = 6;
-            this.numericUpDown1.Value = new decimal(new int[] {
+            this.tbHandlerPort.Name = "tbHandlerPort";
+            this.tbHandlerPort.Size = new System.Drawing.Size(120, 20);
+            this.tbHandlerPort.TabIndex = 6;
+            this.tbHandlerPort.Value = new decimal(new int[] {
             4444,
             0,
             0,
@@ -200,20 +200,20 @@
             this.label5.TabIndex = 5;
             this.label5.Text = "Secret";
             // 
-            // textBox3
+            // tbHandlerPassword
             // 
-            this.textBox3.Location = new System.Drawing.Point(62, 77);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(132, 20);
-            this.textBox3.TabIndex = 4;
+            this.tbHandlerPassword.Location = new System.Drawing.Point(62, 77);
+            this.tbHandlerPassword.Name = "tbHandlerPassword";
+            this.tbHandlerPassword.Size = new System.Drawing.Size(132, 20);
+            this.tbHandlerPassword.TabIndex = 4;
             // 
-            // textBox1
+            // tbHandlerIp
             // 
-            this.textBox1.Location = new System.Drawing.Point(62, 25);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(132, 20);
-            this.textBox1.TabIndex = 2;
-            this.textBox1.Text = "127.0.0.1";
+            this.tbHandlerIp.Location = new System.Drawing.Point(62, 25);
+            this.tbHandlerIp.Name = "tbHandlerIp";
+            this.tbHandlerIp.Size = new System.Drawing.Size(132, 20);
+            this.tbHandlerIp.TabIndex = 2;
+            this.tbHandlerIp.Text = "127.0.0.1";
             // 
             // label4
             // 
@@ -249,7 +249,7 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tbHandlerPort)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -269,11 +269,11 @@
         private System.Windows.Forms.ComboBox tbSettingsConsoleType;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox tbHandlerPassword;
+        private System.Windows.Forms.TextBox tbHandlerIp;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown tbHandlerPort;
         private System.Windows.Forms.Button bConnect;
     }
 }

@@ -12,40 +12,42 @@ namespace OBSCaster {
         private char[] readBuff;
         private int readBuffPointer;
         private int[] bankState;
-        private static readonly Dictionary<int, (string, int)> buttonLookup = new Dictionary<int, (string, int)>() {
-            {3*8+0, ("PREVIEW", 9)},
-            {3*8+1, ("PREVIEW", 10)},
-            {3*8+2, ("PREVIEW", 11)},
-            {3*8+3, ("PREVIEW", 12)},
-            {3*8+4, ("PREVIEW", 13)},
-            {3*8+5, ("PREVIEW", 14)},
-            {3*8+6, ("TAKE", -1)},
-            {3*8+7, ("AUTO", -1)},
-            {4*8+0, ("PROGRAM", 9)},
-            {4*8+1, ("PROGRAM", 10)},
-            {4*8+2, ("PROGRAM", 11)},
-            {4*8+3, ("PROGRAM", 12)},
-            {4*8+4, ("PROGRAM", 13)},
-            {4*8+5, ("PROGRAM", 14)},
-            {4*8+6, ("AUX", 9)},
-            {4*8+7, ("AUX", 10)},
-            {5*8+0, ("ME", 1)},
-            {5*8+1, ("ME", 2)},
-            {5*8+2, ("ME", 3)},
-            {5*8+3, ("ME", 4)},
-            {5*8+4, ("SHIFT", -1)},
-            {5*8+5, ("ALT", -1)},
-            {5*8+6, ("DSK", 1)},
-            {5*8+7, ("DSK", 2)},
-            {6*8+2, ("MAIN", -1)},
-            {6*8+3, ("KNOB", 1)},
-            {6*8+5, ("KNOB", 2)},
-            {6*8+6, ("BKGD", -1)},
-            {6*8+7, ("FTB", -1)},
+        OutputHandler handler;
+        private static readonly Dictionary<int, (ConsoleEvent, int)> buttonLookup = new Dictionary<int, (ConsoleEvent, int)>() {
+            {3*8+0, (ConsoleEvent.PREVIEW, 9)},
+            {3*8+1, (ConsoleEvent.PREVIEW, 10)},
+            {3*8+2, (ConsoleEvent.PREVIEW, 11)},
+            {3*8+3, (ConsoleEvent.PREVIEW, 12)},
+            {3*8+4, (ConsoleEvent.PREVIEW, 13)},
+            {3*8+5, (ConsoleEvent.PREVIEW, 14)},
+            {3*8+6, (ConsoleEvent.TAKE, -1)},
+            {3*8+7, (ConsoleEvent.AUTO, -1)},
+            {4*8+0, (ConsoleEvent.PROGRAM, 9)},
+            {4*8+1, (ConsoleEvent.PROGRAM, 10)},
+            {4*8+2, (ConsoleEvent.PROGRAM, 11)},
+            {4*8+3, (ConsoleEvent.PROGRAM, 12)},
+            {4*8+4, (ConsoleEvent.PROGRAM, 13)},
+            {4*8+5, (ConsoleEvent.PROGRAM, 14)},
+            {4*8+6, (ConsoleEvent.AUX, 9)},
+            {4*8+7, (ConsoleEvent.AUX, 10)},
+            {5*8+0, (ConsoleEvent.ME, 1)},
+            {5*8+1, (ConsoleEvent.ME, 2)},
+            {5*8+2, (ConsoleEvent.ME, 3)},
+            {5*8+3, (ConsoleEvent.ME, 4)},
+            {5*8+4, (ConsoleEvent.SHIFT, -1)},
+            {5*8+5, (ConsoleEvent.ALT, -1)},
+            {5*8+6, (ConsoleEvent.DSK, 1)},
+            {5*8+7, (ConsoleEvent.DSK, 2)},
+            {6*8+2, (ConsoleEvent.MAIN, -1)},
+            {6*8+3, (ConsoleEvent.KNOBBUTTON, 1)},
+            {6*8+5, (ConsoleEvent.KNOBBUTTON, 2)},
+            {6*8+6, (ConsoleEvent.BKGD, -1)},
+            {6*8+7, (ConsoleEvent.FTB, -1)},
         };
 
-        public NewtekMiniController() {
+        public NewtekMiniController(OutputHandler handler) {
             // Console.WriteLine("Created new NewtekMiniController instance");
+            this.handler = handler;
         }
 
         public static string deviceName() {
@@ -133,13 +135,13 @@ namespace OBSCaster {
             }
             switch (bank) {
                 case 24:
-                    dispatchEvent("KNOB2", value);
+                    handler.dispatchEvent(ConsoleEvent.KNOB2, value);
                     break;
                 case 25:
-                    dispatchEvent("KNOB1", value);
+                    handler.dispatchEvent(ConsoleEvent.KNOB1, value);
                     break;
                 case 128:
-                    dispatchEvent("TBAR", value);
+                    handler.dispatchEvent(ConsoleEvent.TBAR, value);
                     break;
                 default:
                     Console.WriteLine("UNKNOWN BANK!");
@@ -155,32 +157,24 @@ namespace OBSCaster {
                     // Console.WriteLine($"Decoded value: {i}");
                     switch (bankIdx) {
                         case 0:
-                            dispatchEvent("AUX", i+1);
+                            handler.dispatchEvent(ConsoleEvent.AUX, i+1);
                             break;
                         case 1:
-                            dispatchEvent("PROGRAM", i+1);
+                            handler.dispatchEvent(ConsoleEvent.PROGRAM, i+1);
                             break;
                         case 2:
-                            dispatchEvent("PREVIEW", i+1);
+                            handler.dispatchEvent(ConsoleEvent.PREVIEW, i+1);
                             break;
                         default:
                             int key = bankIdx * 8 + i;
                             Debug.Assert(buttonLookup.ContainsKey(key));
-                            (string type, int val) = buttonLookup[key];
-                            dispatchEvent(type, val);
+                            (ConsoleEvent type, int val) = buttonLookup[key];
+                            handler.dispatchEvent(type, val);
                             break;
                     }
                 }
             }
             bankState[bankIdx] = inverseVal;
-        }
-
-        private void dispatchEvent(string type, int value = -1) {
-            if (value >= 0) {
-                Console.WriteLine($"{type}: {value}");
-            } else {
-                Console.WriteLine(type);
-            }
         }
     }
 }

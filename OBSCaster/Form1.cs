@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace OBSCaster {
     public partial class Form1 : Form {
         private NewtekController controller;
+        private OutputHandler handler;
 
         public Form1() {
             InitializeComponent();
@@ -12,6 +13,8 @@ namespace OBSCaster {
 
             // Register for USB device connects and disconnects
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+
+            handler = new OBSHandler();
         }
 
         protected override void WndProc(ref Message m) {
@@ -107,7 +110,7 @@ namespace OBSCaster {
             }
             // Set new controller type
             if (tbSettingsConsoleType.SelectedItem.ToString() == NewtekMiniController.deviceName()) {
-                this.controller = new NewtekMiniController();
+                this.controller = new NewtekMiniController(handler);
             } else if (tbSettingsConsoleType.SelectedItem.ToString() == NewTekRS_8.deviceName()) {
                 this.controller = new NewTekRS_8();
             }
@@ -123,16 +126,19 @@ namespace OBSCaster {
         private void bConnect_Click(object sender, EventArgs e) {
             Button bConnect = (Button) sender;
             if (this.controller == null) {
-                MessageBox.Show("Controller type must be set to connect!");
+                MessageBox.Show("Controller type must be set to connect!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
             if (this.controller.IsConnected()) {
                 bConnect.Enabled = false;
                 this.controller.disconnect();
+                handler.disconnect();
                 bConnect.Text = "Connect";
                 bConnect.Enabled = true;
             } else {
                 bConnect.Enabled = false;
+                // TODO: only call connect() on controller if handler returns true (or doesn't re-raise?)
+                handler.connect(tbHandlerIp.Text, (int) tbHandlerPort.Value, tbHandlerPassword.Text);
                 this.controller.connect();
                 // Set backlight value after connect
                 if (this.controller.supportsBacklight()) {
