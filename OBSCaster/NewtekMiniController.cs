@@ -133,13 +133,13 @@ namespace OBSCaster {
             }
             switch (bank) {
                 case 24:
-                    Console.WriteLine($"Right knob: {value}");
+                    dispatchEvent("KNOB2", value);
                     break;
                 case 25:
-                    Console.WriteLine($"Left knob: {value}");
+                    dispatchEvent("KNOB1", value);
                     break;
                 case 128:
-                    Console.WriteLine($"TBar: {value}");
+                    dispatchEvent("TBAR", value);
                     break;
                 default:
                     Console.WriteLine("UNKNOWN BANK!");
