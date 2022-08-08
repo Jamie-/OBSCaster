@@ -37,13 +37,28 @@ namespace OBSCaster {
             } else {
                 Console.WriteLine(type.ToString());
             }
-            switch (type) {
-                case ConsoleEvent.PROGRAM:
-                    changeBusScene(type, value);
-                    break;
-                case ConsoleEvent.PREVIEW:
-                    changeBusScene(type, value);
-                    break;
+            try {
+                switch (type) {
+                    case ConsoleEvent.PREVIEW:
+                        changeBusScene(type, value);
+                        break;
+                    case ConsoleEvent.PROGRAM:
+                        changeBusScene(type, value);
+                        break;
+                    case ConsoleEvent.AUTO:
+                        obs.TransitionToProgram();
+                        break;
+                    case ConsoleEvent.TAKE:
+                        obs.TransitionToProgram(transitionName: "Cut");
+                        break;
+                    case ConsoleEvent.TBAR:
+                        // TODO: Work here required to make TBar work properly with OBS
+                        double pos = value / 255.0;
+                        obs.SetTBarPosition(pos);
+                        break;
+                }
+            } catch (ErrorResponseException err) {
+                Console.WriteLine($"ERROR FROM OBS: {err.Message}");
             }
         }
 
