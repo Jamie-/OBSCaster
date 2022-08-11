@@ -43,6 +43,13 @@ namespace OBSCaster {
             }
             try {
                 switch (type) {
+                    case ConsoleEvent.TBAR:
+                        if (flipTbar) value = 255 - value;
+                        if (value == 255) flipTbar = !flipTbar;
+                        bool release = value == 0 || value == 255;
+                        double pos = value / 255.0;
+                        obs.SetTBarPosition(pos, release);
+                        break;
                     case ConsoleEvent.PREVIEW:
                         changeBusScene(type, value);
                         break;
@@ -57,13 +64,6 @@ namespace OBSCaster {
                         obs.TransitionToProgram(transitionName: "Cut");
                         Thread.Sleep(50);
                         obs.SetCurrentTransition(oldTransition.Name);
-                        break;
-                    case ConsoleEvent.TBAR:
-                        if (flipTbar) value = 255 - value;
-                        if (value == 255) flipTbar = !flipTbar;
-                        bool release = value == 0 || value == 255;
-                        double pos = value / 255.0;
-                        obs.SetTBarPosition(pos, release);
                         break;
                 }
             } catch (ErrorResponseException err) {
