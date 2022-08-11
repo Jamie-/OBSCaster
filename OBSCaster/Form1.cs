@@ -72,6 +72,7 @@ namespace OBSCaster {
                 Console.WriteLine("Disconnecting before shutdown...");
                 this.controller.disconnect();
             }
+            notifyIcon1.Dispose();
             Application.Exit();
         }
 
