@@ -11,26 +11,6 @@ namespace OBSCaster {
             InitializeComponent();
             notifyIcon1.Icon = Properties.Resources.pizza;
 
-            this.tbSettingsConsoleType.Items.AddRange(new string[] {
-                "Newtek Mini Control Surface",
-                "Newtek RS-8",
-            });
-            this.tbSettingsConsoleType.SelectedIndex = 0;
-            Dictionary<string, int> backlightDict = new Dictionary<string, int>() {
-                {"Off", 0},
-                {"1", 1},
-                {"2", 2},
-                {"3", 3},
-                {"4", 4},
-                {"5", 5},
-                {"6", 6},
-                {"7", 7},
-            };
-            this.tbSettingsBacklight.DataSource = new BindingSource(backlightDict, null);
-            this.tbSettingsBacklight.ValueMember = "Value";
-            this.tbSettingsBacklight.DisplayMember = "Key";
-            this.tbSettingsBacklight.SelectedIndex = 0;
-
             // Register for USB device connects and disconnects
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
 
@@ -55,6 +35,26 @@ namespace OBSCaster {
         }
 
         private void Form1_Load(object sender, EventArgs e) {
+            this.tbSettingsConsoleType.Items.AddRange(new string[] {
+                "Newtek Mini Control Surface",
+                "Newtek RS-8",
+            });
+            this.tbSettingsConsoleType.SelectedIndex = 0;
+            Dictionary<string, int> backlightDict = new Dictionary<string, int>() {
+                {"Off", 0},
+                {"1", 1},
+                {"2", 2},
+                {"3", 3},
+                {"4", 4},
+                {"5", 5},
+                {"6", 6},
+                {"7", 7},
+            };
+            this.tbSettingsBacklight.DataSource = new BindingSource(backlightDict, null);
+            this.tbSettingsBacklight.ValueMember = "Value";
+            this.tbSettingsBacklight.DisplayMember = "Key";
+            this.tbSettingsBacklight.SelectedIndex = 0;
+
             // Load settings
             tbSettingsConsoleType.Text = Properties.Settings.Default.ui_console_type;
             tbSettingsBacklight.SelectedValue = Properties.Settings.Default.ui_console_backlight;
