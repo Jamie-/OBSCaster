@@ -42,6 +42,7 @@ namespace OBSCaster {
                 Console.WriteLine(type.ToString());
             }
             try {
+                int delta = 0;
                 switch (type) {
                     case ConsoleEvent.TBAR:
                         if (flipTbar) value = 255 - value;
@@ -62,8 +63,20 @@ namespace OBSCaster {
                     case ConsoleEvent.TAKE:
                         TransitionSettings oldTransition = obs.GetCurrentTransition();
                         obs.TransitionToProgram(transitionName: "Cut");
-                        Thread.Sleep(50);
+                        Thread.Sleep(50);  // OBS needs at least 1 frame between cut and change
                         obs.SetCurrentTransition(oldTransition.Name);
+                        break;
+                    case ConsoleEvent.KNOB1:
+                        // Change selected transition
+                        delta = (value + 128) % 256 - (knobState[0] + 128) % 256;
+                        incrSelectedTransition(delta);
+                        knobState[0] = value;
+                        break;
+                    case ConsoleEvent.KNOB2:
+                        // Change selected transition duration
+                        delta = (value + 128) % 256 - (knobState[1] + 128) % 256;
+                        incrTransitionDuration(delta);
+                        knobState[1] = value;
                         break;
                 }
             } catch (ErrorResponseException err) {
@@ -87,6 +100,26 @@ namespace OBSCaster {
                 Console.WriteLine($"Setting PREVIEW to {scene.Name}");
                 obs.SetPreviewScene(scene.Name);
             }
+        }
+
+        // Changes the selected transition
+        private void incrSelectedTransition(int delta) {
+            GetTransitionListInfo transitions = obs.GetTransitionList();
+            int idx = transitions.Transitions.FindIndex(t => t.Name == transitions.CurrentTransition);
+            idx += delta;
+            while (idx < 0) {
+                idx += transitions.Transitions.Count;
+            }
+            idx %= transitions.Transitions.Count;
+            obs.SetCurrentTransition(transitions.Transitions[idx].Name);
+        }
+
+        // Changes the selected transition duration
+        private void incrTransitionDuration(int delta) {
+            int duration = obs.GetTransitionDuration();
+            duration += delta * 100;
+            if (duration < 100) duration = 100;
+            obs.SetTransitionDuration(duration);
         }
     }
 }
