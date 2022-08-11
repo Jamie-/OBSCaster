@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
+using System.Threading;
 
 namespace OBSCaster {
     class OBSHandler : OutputHandler {
@@ -52,7 +53,10 @@ namespace OBSCaster {
                         obs.TransitionToProgram();
                         break;
                     case ConsoleEvent.TAKE:
+                        TransitionSettings oldTransition = obs.GetCurrentTransition();
                         obs.TransitionToProgram(transitionName: "Cut");
+                        Thread.Sleep(50);
+                        obs.SetCurrentTransition(oldTransition.Name);
                         break;
                     case ConsoleEvent.TBAR:
                         if (flipTbar) value = 255 - value;
