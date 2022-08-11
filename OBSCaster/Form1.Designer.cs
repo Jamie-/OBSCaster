@@ -104,7 +104,7 @@
             this.tbSettingsBacklight.Location = new System.Drawing.Point(73, 49);
             this.tbSettingsBacklight.Name = "tbSettingsBacklight";
             this.tbSettingsBacklight.Size = new System.Drawing.Size(121, 21);
-            this.tbSettingsBacklight.TabIndex = 1;
+            this.tbSettingsBacklight.TabIndex = 2;
             this.tbSettingsBacklight.SelectedIndexChanged += new System.EventHandler(this.tbSettingsBacklight_SelectedIndexChanged);
             // 
             // label1
@@ -135,7 +135,7 @@
             this.bConnect.Location = new System.Drawing.Point(6, 83);
             this.bConnect.Name = "bConnect";
             this.bConnect.Size = new System.Drawing.Size(188, 23);
-            this.bConnect.TabIndex = 5;
+            this.bConnect.TabIndex = 6;
             this.bConnect.Text = "Connect";
             this.bConnect.UseVisualStyleBackColor = true;
             this.bConnect.Click += new System.EventHandler(this.bConnect_Click);
@@ -147,7 +147,7 @@
             this.tbSettingsConsoleType.Location = new System.Drawing.Point(73, 22);
             this.tbSettingsConsoleType.Name = "tbSettingsConsoleType";
             this.tbSettingsConsoleType.Size = new System.Drawing.Size(121, 21);
-            this.tbSettingsConsoleType.TabIndex = 4;
+            this.tbSettingsConsoleType.TabIndex = 1;
             this.tbSettingsConsoleType.SelectedIndexChanged += new System.EventHandler(this.tbSettingsConsoleType_SelectedIndexChanged);
             // 
             // label2
@@ -184,12 +184,7 @@
             0});
             this.tbHandlerPort.Name = "tbHandlerPort";
             this.tbHandlerPort.Size = new System.Drawing.Size(120, 20);
-            this.tbHandlerPort.TabIndex = 6;
-            this.tbHandlerPort.Value = new decimal(new int[] {
-            4444,
-            0,
-            0,
-            0});
+            this.tbHandlerPort.TabIndex = 4;
             // 
             // label5
             // 
@@ -205,15 +200,14 @@
             this.tbHandlerPassword.Location = new System.Drawing.Point(62, 77);
             this.tbHandlerPassword.Name = "tbHandlerPassword";
             this.tbHandlerPassword.Size = new System.Drawing.Size(132, 20);
-            this.tbHandlerPassword.TabIndex = 4;
+            this.tbHandlerPassword.TabIndex = 5;
             // 
             // tbHandlerIp
             // 
             this.tbHandlerIp.Location = new System.Drawing.Point(62, 25);
             this.tbHandlerIp.Name = "tbHandlerIp";
             this.tbHandlerIp.Size = new System.Drawing.Size(132, 20);
-            this.tbHandlerIp.TabIndex = 2;
-            this.tbHandlerIp.Text = "127.0.0.1";
+            this.tbHandlerIp.TabIndex = 3;
             // 
             // label4
             // 

@@ -11,27 +11,6 @@ namespace OBSCaster {
             InitializeComponent();
             notifyIcon1.Icon = Properties.Resources.pizza;
 
-            // Register for USB device connects and disconnects
-            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
-
-            handler = new OBSHandler();
-        }
-
-        protected override void WndProc(ref Message m) {
-            base.WndProc(ref m);
-            if (m.Msg == UsbNotification.WmDevicechange) {
-                switch ((int)m.WParam) {
-                    case UsbNotification.DbtDeviceremovecomplete:
-						Console.WriteLine($"USB Device removed!!");
-                        break;
-                    case UsbNotification.DbtDevicearrival:
-                        Console.WriteLine($"USB Device connected!!");
-                        break;
-                }
-            }
-        }
-
-        private void Form1_Load(object sender, EventArgs e) {
             this.tbSettingsConsoleType.Items.AddRange(new string[] {
                 "Newtek Mini Control Surface",
                 "Newtek RS-8",
@@ -51,16 +30,40 @@ namespace OBSCaster {
             this.tbSettingsBacklight.ValueMember = "Value";
             this.tbSettingsBacklight.DisplayMember = "Key";
             this.tbSettingsBacklight.SelectedIndex = 0;
+
+            // Register for USB device connects and disconnects
+            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+
+            handler = new OBSHandler();
+
+            // Show settings window on startup
+            this.Show();
+        }
+
+        protected override void WndProc(ref Message m) {
+            base.WndProc(ref m);
+            if (m.Msg == UsbNotification.WmDevicechange) {
+                switch ((int)m.WParam) {
+                    case UsbNotification.DbtDeviceremovecomplete:
+						Console.WriteLine($"USB Device removed!!");
+                        break;
+                    case UsbNotification.DbtDevicearrival:
+                        Console.WriteLine($"USB Device connected!!");
+                        break;
+                }
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e) {
+            // Load settings
+            tbSettingsConsoleType.Text = Properties.Settings.Default.ui_console_type;
+            tbSettingsBacklight.SelectedValue = Properties.Settings.Default.ui_console_backlight;
+            tbHandlerIp.Text = Properties.Settings.Default.ui_handler_ip;
+            tbHandlerPort.Value = Properties.Settings.Default.ui_handler_port;
+            tbHandlerPassword.Text = Properties.Settings.Default.ui_handler_secret;
+
             var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
             Console.WriteLine($"Com port: {ports[0]}");
-            
-            //Console.WriteLine($"Com port: {ports[0]}");
-            //this.sp = new SerialPort(ports[0], 9600);
-            //this.sp.NewLine = "\r";
-            //this.sp.Open();
-            //this.sp.WriteLine("00FF");
-            //this.sp.Close();
-            //Console.WriteLine("hi");
         }
 
         // Handle exit
@@ -84,6 +87,14 @@ namespace OBSCaster {
                 e.Cancel = true;
                 this.Hide();
                 notifyIcon1.Visible = true;
+
+                // Save settings
+                Properties.Settings.Default.ui_console_type = tbSettingsConsoleType.Text;
+                Properties.Settings.Default.ui_console_backlight = (int) tbSettingsBacklight.SelectedValue;
+                Properties.Settings.Default.ui_handler_ip = tbHandlerIp.Text;
+                Properties.Settings.Default.ui_handler_port = (int) tbHandlerPort.Value;
+                Properties.Settings.Default.ui_handler_secret = tbHandlerPassword.Text;
+                Properties.Settings.Default.Save();
                 return;
             }
         }
