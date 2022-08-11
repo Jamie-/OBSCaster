@@ -7,6 +7,9 @@ using OBSWebsocketDotNet.Types;
 namespace OBSCaster {
     class OBSHandler : OutputHandler {
         private OBSWebsocket obs;
+        // Knobs state
+        private int[] knobState = new int[] { 0, 0, 0 };
+        private bool flipTbar = false;
 
         public OBSHandler() {
             obs = new OBSWebsocket();
@@ -52,9 +55,11 @@ namespace OBSCaster {
                         obs.TransitionToProgram(transitionName: "Cut");
                         break;
                     case ConsoleEvent.TBAR:
-                        // TODO: Work here required to make TBar work properly with OBS
+                        if (flipTbar) value = 255 - value;
+                        if (value == 255) flipTbar = !flipTbar;
+                        bool release = value == 0 || value == 255;
                         double pos = value / 255.0;
-                        obs.SetTBarPosition(pos);
+                        obs.SetTBarPosition(pos, release);
                         break;
                 }
             } catch (ErrorResponseException err) {
