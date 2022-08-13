@@ -18,6 +18,7 @@ namespace OBSCaster {
         public OBSHandler() {
             obs = new OBSWebsocket();
             sceneList = new List<string>();
+            obs.Connected += onConnected;
             obs.SceneChanged += onSceneChange;
             obs.PreviewSceneChanged += onPreviewSceneChange;
             obs.SceneListChanged += onScenesChanged;
@@ -146,6 +147,14 @@ namespace OBSCaster {
             duration += delta * 100;
             if (duration < 100) duration = 100;
             obs.SetTransitionDuration(duration);
+        }
+
+        // Set initial controller LEDs on first connect
+        private void onConnected(object sender, EventArgs e) {
+            controller.setTransitionsLeds(true);
+            updateSceneList();
+            controller.setLedProgram(sceneList.IndexOf(obs.GetCurrentScene().Name));
+            controller.setLedPreview(sceneList.IndexOf(obs.GetPreviewScene().Name));
         }
 
         private void onSceneChange(OBSWebsocket sender, string newSceneName) {
