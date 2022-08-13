@@ -138,11 +138,11 @@ namespace OBSCaster {
 			port.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
 			Console.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
 		}
-		public void setProgramLED(int led, bool exclusive=true) {
+		public override void setLedProgram(int led, bool exclusive=true) {
 			setLED(led, 2, exclusive);
 		}
 
-		public void setPreviewLED(int led, bool exclusive = true) {
+		public override void setLedPreview(int led, bool exclusive = true) {
 			setLED(led, 1, exclusive);
 		}
 		public void setOtherLED(Leds led, bool state) {

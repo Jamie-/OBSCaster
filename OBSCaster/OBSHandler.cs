@@ -4,16 +4,23 @@ using System.Collections.Generic;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
 using System.Threading;
+using System.Linq;
 
 namespace OBSCaster {
     class OBSHandler : OutputHandler {
         private OBSWebsocket obs;
+        // Cache of string names (to calculate indexes)
+        private List<string> sceneList;
         // Knobs state
         private int[] knobState = new int[] { 0, 0, 0 };
         private bool flipTbar = false;
 
         public OBSHandler() {
             obs = new OBSWebsocket();
+            sceneList = new List<string>();
+            obs.SceneChanged += onSceneChange;
+            obs.PreviewSceneChanged += onPreviewSceneChange;
+            obs.SceneListChanged += onScenesChanged;
         }
 
         public override bool connect(string ip, int port, string password) {
@@ -43,6 +50,12 @@ namespace OBSCaster {
 
         public override void disconnect() {
             obs.Disconnect();
+        }
+
+        // Update the sceneList cache
+        private void updateSceneList() {
+            List<OBSScene> scenes = obs.ListScenes();
+            sceneList = scenes.Select(o => o.Name).ToList();
         }
 
         // Dispatch event to OBS
@@ -97,19 +110,19 @@ namespace OBSCaster {
 
         // Change the scene in a bus
         private void changeBusScene(ConsoleEvent bus, int index) {
-            List<OBSScene> scenes = obs.ListScenes();
-            if (index > scenes.Count) {
+            updateSceneList();
+            if (index > sceneList.Count) {
                 // No-op for now if the selected scene doesn't exist
                 Console.WriteLine("Selected scene doesn't exist, no-op");
                 return;
             }
-            OBSScene scene = scenes[index - 1];
+            string scene = sceneList[index - 1];
             if (bus == ConsoleEvent.PROGRAM) {
-                Console.WriteLine($"Setting PROGRAM to {scene.Name}");
-                obs.SetCurrentScene(scene.Name);
+                Console.WriteLine($"Setting PROGRAM to {scene}");
+                obs.SetCurrentScene(scene);
             } else if (bus == ConsoleEvent.PREVIEW) {
-                Console.WriteLine($"Setting PREVIEW to {scene.Name}");
-                obs.SetPreviewScene(scene.Name);
+                Console.WriteLine($"Setting PREVIEW to {scene}");
+                obs.SetPreviewScene(scene);
             }
         }
 
@@ -131,6 +144,22 @@ namespace OBSCaster {
             duration += delta * 100;
             if (duration < 100) duration = 100;
             obs.SetTransitionDuration(duration);
+        }
+
+        private void onSceneChange(OBSWebsocket sender, string newSceneName) {
+            Console.WriteLine($"Scene change: {newSceneName}");
+            updateSceneList();
+            controller.setLedProgram(sceneList.IndexOf(newSceneName));
+        }
+
+        private void onPreviewSceneChange(OBSWebsocket sender, string newSceneName) {
+            Console.WriteLine($"Preview scene change: {newSceneName}");
+            updateSceneList();
+            controller.setLedPreview(sceneList.IndexOf(newSceneName));
+        }
+
+        private void onScenesChanged(object sender, EventArgs e) {
+            updateSceneList();
         }
     }
 }

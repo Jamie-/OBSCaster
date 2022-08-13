@@ -3,16 +3,20 @@ using System.IO.Ports;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace OBSCaster {
     class NewtekMiniController : NewtekController {
         private SerialPort port;
         private Thread readThread;
-        private bool _runReadThread;
+        private Thread writeThread;
+        private bool _runSerialThreads;
         private char[] readBuff;
         private int readBuffPointer;
         private int[] bankState;
         OutputHandler handler;
+        private ConcurrentQueue<string> writeQueue;
+        private EventWaitHandle wakeWrite;
         private static readonly Dictionary<int, (ConsoleEvent, int)> buttonLookup = new Dictionary<int, (ConsoleEvent, int)>() {
             {3*8+0, (ConsoleEvent.PREVIEW, 9)},
             {3*8+1, (ConsoleEvent.PREVIEW, 10)},
@@ -48,6 +52,7 @@ namespace OBSCaster {
         public NewtekMiniController(OutputHandler handler) {
             // Console.WriteLine("Created new NewtekMiniController instance");
             this.handler = handler;
+            writeQueue = new ConcurrentQueue<string>();
         }
 
         public static string deviceName() {
@@ -62,16 +67,22 @@ namespace OBSCaster {
             port.Open();
             bankState = new int[] { 0, 0, 0, 0, 0, 0, 19 };
             readThread = new Thread(readSerialPort);
-            _runReadThread = true;
+            writeThread = new Thread(writeSerialPort);
+            _runSerialThreads = true;
             readBuff = new char[4];
             readBuffPointer = 0;
+            // TODO: implement alternative to .Clear()
+            // .Clear() only added in .NET 5
+            // writeQueue.Clear();
+            wakeWrite = new EventWaitHandle(false, EventResetMode.ManualReset);
             readThread.Start();
+            writeThread.Start();
         }
 
         // Internal serial read thread
         private void readSerialPort() {
             Console.WriteLine("Starting serial read thread...");
-            while (_runReadThread) {
+            while (_runSerialThreads) {
                 try {
                     Int32 chunk = port.ReadChar();
                     if (readBuffPointer == 4) {
@@ -93,11 +104,35 @@ namespace OBSCaster {
             Console.WriteLine("Serial read thread exited!");
         }
 
+        // Internal serial write thread
+        private void writeSerialPort() {
+            Console.WriteLine("Starting serial write thread...");
+            while (_runSerialThreads) {
+                string data;
+                if (writeQueue.TryDequeue(out data)) {
+                    port.Write(data + "\r");
+                } else {
+                    if (wakeWrite.WaitOne(500)) {
+                        // Reset the event ready for the next iteration
+                        wakeWrite.Reset();
+                    }
+                }
+            }
+            Console.WriteLine("Serial write thread exited!");
+        }
+
         // Close internal read thread and serial port
         protected override void _disconnect() {
-            _runReadThread = false;
+            _runSerialThreads = false;
             readThread.Join();
+            writeThread.Join();
             port.Close();
+        }
+
+        // Queue a write for the write thread
+        private void _queueWrite(string cmd) {
+            writeQueue.Enqueue(cmd);
+            wakeWrite.Set();
         }
 
         public override bool supportsBacklight() {
@@ -175,6 +210,36 @@ namespace OBSCaster {
                 }
             }
             bankState[bankIdx] = inverseVal;
+        }
+
+        // Set the program LED to the given index
+        public override void setLedProgram(int idx, bool exclusive = true) {
+            if (idx < 8) {
+                // First bank
+                int val = 255 & ~(1 << idx);
+                _queueWrite($"11" + val.ToString("X"));
+                _queueWrite($"14FF");
+            } else {
+                // Second bank
+                int val = 255 & ~(1 << idx - 8);
+                _queueWrite($"14" + val.ToString("X"));
+                _queueWrite($"11FF");
+            }
+        }
+
+        // Set the preview LED to the given index
+        public override void setLedPreview(int idx, bool exclusive = true) {
+            if (idx < 8) {
+                // First bank
+                int val = 255 & ~(1 << idx);
+                _queueWrite($"12" + val.ToString("X"));
+                _queueWrite($"133F");
+            } else {
+                // Second bank (192 causes take & auto to stay lit)
+                int val = 255 & ~((1 << idx - 8) | 192);
+                _queueWrite($"13" + val.ToString("X"));
+                _queueWrite($"12FF");
+            }
         }
     }
 }

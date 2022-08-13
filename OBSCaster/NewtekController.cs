@@ -50,5 +50,9 @@ namespace OBSCaster {
         public abstract bool supportsBacklight();
 
         public abstract void setBacklight(int level);
+
+        public abstract void setLedProgram(int idx, bool exclusive = true);
+
+        public abstract void setLedPreview(int idx, bool exclusive = true);
     }
 }
