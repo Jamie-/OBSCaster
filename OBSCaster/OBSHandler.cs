@@ -20,14 +20,25 @@ namespace OBSCaster {
             string uri = $"ws://{ip}:{port}";
             try {
                 obs.Connect(uri, password);
+                if (!obs.WSConnection.IsAlive) {
+                    Console.WriteLine("OBS websocket connection failed!");
+                    MessageBox.Show(
+                        "Connection to OBS failed\nHave you enabled the websocket?",
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Exclamation
+                    );
+                    return false;
+                }
                 return true;
             } catch (AuthFailureException) {
+                Console.WriteLine("OBS websocket auth failed!");
                 MessageBox.Show("Authentication failed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return false;
             } catch (ErrorResponseException err) {
+                Console.WriteLine($"OBS websocket returned error! {err.Message}");
                 MessageBox.Show("Connect failed: " + err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return false;
             }
+            return false;
         }
 
         public override void disconnect() {
