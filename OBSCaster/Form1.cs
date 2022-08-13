@@ -63,7 +63,9 @@ namespace OBSCaster {
             tbHandlerPassword.Text = Properties.Settings.Default.ui_handler_secret;
 
             var ports = SerialPortModel.ComPortFromIDs("0403", "6001");
-            Console.WriteLine($"Com port: {ports[0]}");
+            foreach (var port in ports) {
+                Console.WriteLine($"Found port: {port}");
+            }
         }
 
         // Handle exit
@@ -141,6 +143,7 @@ namespace OBSCaster {
                 MessageBox.Show("Controller type must be set to connect!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
+            // TODO: this 'if' is a bit sus now we connect to a controller and a handler
             if (this.controller.IsConnected()) {
                 bConnect.Enabled = false;
                 this.controller.disconnect();
@@ -151,12 +154,16 @@ namespace OBSCaster {
                 bConnect.Enabled = false;
                 // TODO: only call connect() on controller if handler returns true (or doesn't re-raise?)
                 handler.connect(tbHandlerIp.Text, (int) tbHandlerPort.Value, tbHandlerPassword.Text);
-                this.controller.connect();
-                // Set backlight value after connect
-                if (this.controller.supportsBacklight()) {
-                    this.controller.setBacklight((int) tbSettingsBacklight.SelectedValue);
+                try {
+                    this.controller.connect();
+                    // Set backlight value after connect
+                    if (this.controller.supportsBacklight()) {
+                        this.controller.setBacklight((int)tbSettingsBacklight.SelectedValue);
+                    }
+                    bConnect.Text = "Disconnect";
+                } catch (System.IO.IOException ex) {
+                    MessageBox.Show(ex.Message.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
-                bConnect.Text = "Disconnect";
                 bConnect.Enabled = true;
             }
         }
