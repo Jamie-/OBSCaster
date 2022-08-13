@@ -21,6 +21,8 @@ namespace OBSCaster {
             obs.SceneChanged += onSceneChange;
             obs.PreviewSceneChanged += onPreviewSceneChange;
             obs.SceneListChanged += onScenesChanged;
+            obs.TransitionBegin += onTransitionBegin;
+            obs.TransitionEnd += onTransitionEnd;
         }
 
         public override bool connect(string ip, int port, string password) {
@@ -160,6 +162,16 @@ namespace OBSCaster {
 
         private void onScenesChanged(object sender, EventArgs e) {
             updateSceneList();
+        }
+
+        private void onTransitionBegin(OBSWebsocket sender, string transitionName, string transitionType, int duration, string fromScene, string toScene) {
+            Console.WriteLine($"Starting transition {transitionName}");
+            if (transitionType != "cut_transition") controller.setTransitionsLeds(false);
+        }
+
+        private void onTransitionEnd(OBSWebsocket sender, string transitionName, string transitionType, int duration, string toScene) {
+            Console.WriteLine($"Ended transition {transitionName}");
+            if (transitionType != "cut_transition") controller.setTransitionsLeds(true);
         }
     }
 }

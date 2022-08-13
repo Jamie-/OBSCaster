@@ -14,6 +14,7 @@ namespace OBSCaster {
         private char[] readBuff;
         private int readBuffPointer;
         private int[] bankState;
+        private int[] ledState;
         OutputHandler handler;
         private ConcurrentQueue<string> writeQueue;
         private EventWaitHandle wakeWrite;
@@ -66,6 +67,7 @@ namespace OBSCaster {
             port.WriteTimeout = 500;
             port.Open();
             bankState = new int[] { 0, 0, 0, 0, 0, 0, 19 };
+            ledState = new int[] { 255, 255, 255, 63, 255, 255, 255 };
             readThread = new Thread(readSerialPort);
             writeThread = new Thread(writeSerialPort);
             _runSerialThreads = true;
@@ -217,13 +219,13 @@ namespace OBSCaster {
             if (idx < 8) {
                 // First bank
                 int val = 255 & ~(1 << idx);
-                _queueWrite($"11" + val.ToString("X"));
-                _queueWrite($"14FF");
+                _queueWrite("11" + val.ToString("X2"));
+                _queueWrite("14FF");
             } else {
                 // Second bank
                 int val = 255 & ~(1 << idx - 8);
-                _queueWrite($"14" + val.ToString("X"));
-                _queueWrite($"11FF");
+                _queueWrite("14" + val.ToString("X2"));
+                _queueWrite("11FF");
             }
         }
 
@@ -232,13 +234,29 @@ namespace OBSCaster {
             if (idx < 8) {
                 // First bank
                 int val = 255 & ~(1 << idx);
-                _queueWrite($"12" + val.ToString("X"));
-                _queueWrite($"133F");
+                _queueWrite("12" + val.ToString("X2"));
+                val = ledState[3] | 63;
+                _queueWrite("13" + val.ToString("X2"));
+                ledState[3] = val;
             } else {
-                // Second bank (192 causes take & auto to stay lit)
-                int val = 255 & ~((1 << idx - 8) | 192);
-                _queueWrite($"13" + val.ToString("X"));
-                _queueWrite($"12FF");
+                // Second bank
+                int val = (ledState[3] | 63) & ~(1 << idx - 8);
+                _queueWrite("13" + val.ToString("X2"));
+                ledState[3] = val;
+                _queueWrite("12FF");
+            }
+        }
+
+        // Set the auto/take LEDs on and off
+        public override void setTransitionsLeds(bool state) {
+            if (state) {
+                int val = ledState[3] & ~(3 << 6);
+                _queueWrite("13" + val.ToString("X2"));
+                ledState[3] = val;
+            } else {
+                int val = ledState[3] | (3 << 6);
+                _queueWrite("13" + val.ToString("X2"));
+                ledState[3] = val;
             }
         }
     }

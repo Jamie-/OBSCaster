@@ -145,6 +145,11 @@ namespace OBSCaster {
 		public override void setLedPreview(int led, bool exclusive = true) {
 			setLED(led, 1, exclusive);
 		}
+
+		public override void setTransitionsLeds(bool state) {
+			
+		}
+
 		public void setOtherLED(Leds led, bool state) {
 			setLED((int)led, 3, false, state);
 		}
