@@ -144,7 +144,7 @@ namespace OBSCaster {
                 MessageBox.Show("Controller type must be set to connect!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            
+
             if (connected) {
                 bConnect.Enabled = false;
                 this.controller.disconnect();
