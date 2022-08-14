@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 using System.Collections.Generic;
 
@@ -118,10 +119,7 @@ namespace OBSCaster {
         // Change device type
         private void tbSettingsConsoleType_SelectedIndexChanged(object sender, EventArgs e) {
             ComboBox tbSettingsConsoleType = (ComboBox) sender;
-            if (this.controller != null && this.controller.IsConnected()) {
-                // TODO: if we pick the same controller type we shouldn't disconnect!
-                this.controller.disconnect();
-            }
+            if (controller != null) Debug.Assert(!controller.IsConnected());
             // Set new controller type
             if (tbSettingsConsoleType.SelectedItem.ToString() == NewtekMiniController.deviceName()) {
                 this.controller = new NewtekMiniController(handler);
@@ -152,8 +150,10 @@ namespace OBSCaster {
                 handler.disconnect();
                 bConnect.Text = "Connect";
                 bConnect.Enabled = true;
+                tbSettingsConsoleType.Enabled = true;
             } else {
                 bConnect.Enabled = false;
+                tbSettingsConsoleType.Enabled = false;
                 try {
                     this.controller.connect();
                     // TODO: disconnect controller if handler connect fails
@@ -165,6 +165,7 @@ namespace OBSCaster {
                     bConnect.Text = "Disconnect";
                 } catch (System.IO.IOException ex) {
                     MessageBox.Show(ex.Message.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    tbSettingsConsoleType.Enabled = true;
                 }
                 bConnect.Enabled = true;
             }
