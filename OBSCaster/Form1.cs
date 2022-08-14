@@ -7,6 +7,7 @@ namespace OBSCaster {
     public partial class Form1 : Form {
         private NewtekController controller;
         private OutputHandler handler;
+        private bool connected = false;
 
         public Form1() {
             InitializeComponent();
@@ -143,11 +144,12 @@ namespace OBSCaster {
                 MessageBox.Show("Controller type must be set to connect!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            // TODO: this 'if' is a bit sus now we connect to a controller and a handler
-            if (this.controller.IsConnected()) {
+            
+            if (connected) {
                 bConnect.Enabled = false;
                 this.controller.disconnect();
                 handler.disconnect();
+                connected = false;
                 bConnect.Text = "Connect";
                 bConnect.Enabled = true;
                 tbSettingsConsoleType.Enabled = true;
@@ -168,6 +170,7 @@ namespace OBSCaster {
                         this.controller.setBacklight((int)tbSettingsBacklight.SelectedValue);
                     }
                     bConnect.Text = "Disconnect";
+                    connected = true;
                 } catch (System.IO.IOException ex) {
                     MessageBox.Show(ex.Message.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     tbSettingsConsoleType.Enabled = true;
