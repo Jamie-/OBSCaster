@@ -13,7 +13,6 @@ namespace OBSCaster {
         private List<string> sceneList;
         // Knobs state
         private int[] knobState = new int[] { 0, 0, 0 };
-        private bool flipTbar = false;
 
         public OBSHandler() {
             obs = new OBSWebsocket();
@@ -72,8 +71,6 @@ namespace OBSCaster {
                 int delta = 0;
                 switch (type) {
                     case ConsoleEvent.TBAR:
-                        if (flipTbar) value = 255 - value;
-                        if (value == 255) flipTbar = !flipTbar;
                         bool release = value == 0 || value == 255;
                         double pos = value / 255.0;
                         obs.SetTBarPosition(pos, release);
@@ -180,7 +177,7 @@ namespace OBSCaster {
 
         private void onTransitionEnd(OBSWebsocket sender, string transitionName, string transitionType, int duration, string toScene) {
             Console.WriteLine($"Ended transition {transitionName}");
-            if (transitionType != "cut_transition") controller.setTransitionsLeds(true);
+            controller.setTransitionsLeds(true);
         }
     }
 }

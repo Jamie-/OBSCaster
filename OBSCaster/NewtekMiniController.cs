@@ -18,6 +18,8 @@ namespace OBSCaster {
         OutputHandler handler;
         private ConcurrentQueue<string> writeQueue;
         private EventWaitHandle wakeWrite;
+        private bool flipTbar = false;
+        private int tBarLedState = 0;
         private static readonly Dictionary<int, (ConsoleEvent, int)> buttonLookup = new Dictionary<int, (ConsoleEvent, int)>() {
             {3*8+0, (ConsoleEvent.PREVIEW, 9)},
             {3*8+1, (ConsoleEvent.PREVIEW, 10)},
@@ -178,6 +180,15 @@ namespace OBSCaster {
                     handler.dispatchEvent(ConsoleEvent.KNOB1, value);
                     break;
                 case 128:
+                    // Set TBar directional LEDs
+                    if (value == 0 || value == 255) setTBarLeds(0);
+                    else if (flipTbar) setTBarLeds(1);
+                    else setTBarLeds(2);
+                    // Flip TBar direction to always count 0-255
+                    if (flipTbar) value = 255 - value;
+                    // If we abort the transition, turn transition LEDs back on
+                    if (value == 0) setTransitionsLeds(true);
+                    if (value == 255) flipTbar = !flipTbar;
                     handler.dispatchEvent(ConsoleEvent.TBAR, value);
                     break;
                 default:
@@ -258,6 +269,24 @@ namespace OBSCaster {
                 _queueWrite("13" + val.ToString("X2"));
                 ledState[3] = val;
             }
+        }
+
+        // Set the TBar directional LEDs
+        private void setTBarLeds(int state) {
+            // 0: off, 1: bottom, 2: top
+            if (state == tBarLedState) return;
+            switch (state) {
+                case 0:
+                    _queueWrite("09FF");
+                    break;
+                case 1:
+                    _queueWrite("09FE");
+                    break;
+                case 2:
+                    _queueWrite("09FD");
+                    break;
+            }
+            tBarLedState = state;
         }
     }
 }

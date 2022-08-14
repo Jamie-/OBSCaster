@@ -146,9 +146,8 @@ namespace OBSCaster {
 			setLED(led, 1, exclusive);
 		}
 
-		public override void setTransitionsLeds(bool state) {
-			
-		}
+		// RS-8 doesn't have transition LEDs
+		public override void setTransitionsLeds(bool state) { }
 
 		public void setOtherLED(Leds led, bool state) {
 			setLED((int)led, 3, false, state);
