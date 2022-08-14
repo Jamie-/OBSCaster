@@ -156,8 +156,13 @@ namespace OBSCaster {
                 tbSettingsConsoleType.Enabled = false;
                 try {
                     this.controller.connect();
-                    // TODO: disconnect controller if handler connect fails
-                    handler.connect(tbHandlerIp.Text, (int)tbHandlerPort.Value, tbHandlerPassword.Text);
+                    if (!handler.connect(tbHandlerIp.Text, (int)tbHandlerPort.Value, tbHandlerPassword.Text)) {
+                        // Bail out if handler fails to connect
+                        this.controller.disconnect();
+                        tbSettingsConsoleType.Enabled = true;
+                        bConnect.Enabled = true;
+                        return;
+                    }
                     // Set backlight value after connect
                     if (this.controller.supportsBacklight()) {
                         this.controller.setBacklight((int)tbSettingsBacklight.SelectedValue);
