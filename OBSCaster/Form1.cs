@@ -126,7 +126,7 @@ namespace OBSCaster {
                 this.controller = new NewtekMiniController(handler);
                 handler.controller = controller;
             } else if (tbSettingsConsoleType.SelectedItem.ToString() == NewTekRS_8.deviceName()) {
-                this.controller = new NewTekRS_8();
+                this.controller = new NewTekRS_8(handler);
                 handler.controller = controller;
             }
             // Enable/disable backlight settings depending on if supported or not

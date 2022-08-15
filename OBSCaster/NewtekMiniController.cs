@@ -1,23 +1,11 @@
 ﻿using System;
-using System.IO.Ports;
-using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 namespace OBSCaster {
     class NewtekMiniController : NewtekController {
-        private SerialPort port;
-        private Thread readThread;
-        private Thread writeThread;
-        private bool _runSerialThreads;
-        private char[] readBuff;
-        private int readBuffPointer;
         private int[] bankState;
         private int[] ledState;
-        OutputHandler handler;
-        private ConcurrentQueue<string> writeQueue;
-        private EventWaitHandle wakeWrite;
         private bool flipTbar = false;
         private int tBarLedState = 0;
         private static readonly Dictionary<int, (ConsoleEvent, int)> buttonLookup = new Dictionary<int, (ConsoleEvent, int)>() {
@@ -52,92 +40,20 @@ namespace OBSCaster {
             {6*8+7, (ConsoleEvent.FTB, -1)},
         };
 
-        public NewtekMiniController(OutputHandler handler) {
-            // Console.WriteLine("Created new NewtekMiniController instance");
+        public NewtekMiniController(OutputHandler handler):base(9600) {
             this.handler = handler;
-            writeQueue = new ConcurrentQueue<string>();
         }
 
         public static string deviceName() {
             return "Newtek Mini Control Surface";
         }
 
-        protected override void _connect(string serialPortName) {
-            port = new SerialPort(serialPortName);
-            port.BaudRate = 9600;
-            port.ReadTimeout = 500;
-            port.WriteTimeout = 500;
-            port.Open();
+        protected override void _connect() {
             bankState = new int[] { 0, 0, 0, 0, 0, 0, 19 };
             ledState = new int[] { 255, 255, 255, 63, 255, 255, 255 };
-            readThread = new Thread(readSerialPort);
-            writeThread = new Thread(writeSerialPort);
-            _runSerialThreads = true;
-            readBuff = new char[4];
-            readBuffPointer = 0;
-            // TODO: implement alternative to .Clear()
-            // .Clear() only added in .NET 5
-            // writeQueue.Clear();
-            wakeWrite = new EventWaitHandle(false, EventResetMode.ManualReset);
-            readThread.Start();
-            writeThread.Start();
         }
 
-        // Internal serial read thread
-        private void readSerialPort() {
-            Console.WriteLine("Starting serial read thread...");
-            while (_runSerialThreads) {
-                try {
-                    Int32 chunk = port.ReadChar();
-                    if (readBuffPointer == 4) {
-                        if (chunk == 13) {
-                            // Dispatch event
-                            string cmd = new string(readBuff);
-                            decodeCommand(cmd);
-                        } else {
-                            // Got something weird - just reset the pointer and move on
-                            Console.WriteLine("Received malformed data!");
-                        }
-                        readBuffPointer = 0;
-                    } else {
-                        readBuff[readBuffPointer] = (char) chunk;
-                        readBuffPointer++;
-                    }
-                } catch (TimeoutException) { }
-            }
-            Console.WriteLine("Serial read thread exited!");
-        }
-
-        // Internal serial write thread
-        private void writeSerialPort() {
-            Console.WriteLine("Starting serial write thread...");
-            while (_runSerialThreads) {
-                string data;
-                if (writeQueue.TryDequeue(out data)) {
-                    port.Write(data + "\r");
-                } else {
-                    if (wakeWrite.WaitOne(500)) {
-                        // Reset the event ready for the next iteration
-                        wakeWrite.Reset();
-                    }
-                }
-            }
-            Console.WriteLine("Serial write thread exited!");
-        }
-
-        // Close internal read thread and serial port
-        protected override void _disconnect() {
-            _runSerialThreads = false;
-            readThread.Join();
-            writeThread.Join();
-            port.Close();
-        }
-
-        // Queue a write for the write thread
-        private void _queueWrite(string cmd) {
-            writeQueue.Enqueue(cmd);
-            wakeWrite.Set();
-        }
+        protected override void _disconnect() { }
 
         public override bool supportsBacklight() {
             return true;
@@ -147,10 +63,10 @@ namespace OBSCaster {
         public override void setBacklight(int level) {
             Console.WriteLine($"Setting backlight to level: {level}");
             Debug.Assert(level >= 0 && level <= 7);
-            port.Write($"070{level}\r");
+            queueWrite($"070{level}\r");
         }
 
-        private void decodeCommand(string command) {
+        protected override void decodeCommand(string command) {
             if (command.Length != 4) {
                 Console.WriteLine($"Invalid command from controller: {command}");
                 return;
@@ -230,13 +146,13 @@ namespace OBSCaster {
             if (idx < 8) {
                 // First bank
                 int val = 255 & ~(1 << idx);
-                _queueWrite("11" + val.ToString("X2"));
-                _queueWrite("14FF");
+                queueWrite("11" + val.ToString("X2"));
+                queueWrite("14FF");
             } else {
                 // Second bank
                 int val = 255 & ~(1 << idx - 8);
-                _queueWrite("14" + val.ToString("X2"));
-                _queueWrite("11FF");
+                queueWrite("14" + val.ToString("X2"));
+                queueWrite("11FF");
             }
         }
 
@@ -245,16 +161,16 @@ namespace OBSCaster {
             if (idx < 8) {
                 // First bank
                 int val = 255 & ~(1 << idx);
-                _queueWrite("12" + val.ToString("X2"));
+                queueWrite("12" + val.ToString("X2"));
                 val = ledState[3] | 63;
-                _queueWrite("13" + val.ToString("X2"));
+                queueWrite("13" + val.ToString("X2"));
                 ledState[3] = val;
             } else {
                 // Second bank
                 int val = (ledState[3] | 63) & ~(1 << idx - 8);
-                _queueWrite("13" + val.ToString("X2"));
+                queueWrite("13" + val.ToString("X2"));
                 ledState[3] = val;
-                _queueWrite("12FF");
+                queueWrite("12FF");
             }
         }
 
@@ -262,11 +178,11 @@ namespace OBSCaster {
         public override void setTransitionsLeds(bool state) {
             if (state) {
                 int val = ledState[3] & ~(3 << 6);
-                _queueWrite("13" + val.ToString("X2"));
+                queueWrite("13" + val.ToString("X2"));
                 ledState[3] = val;
             } else {
                 int val = ledState[3] | (3 << 6);
-                _queueWrite("13" + val.ToString("X2"));
+                queueWrite("13" + val.ToString("X2"));
                 ledState[3] = val;
             }
         }
@@ -277,13 +193,13 @@ namespace OBSCaster {
             if (state == tBarLedState) return;
             switch (state) {
                 case 0:
-                    _queueWrite("09FF");
+                    queueWrite("09FF");
                     break;
                 case 1:
-                    _queueWrite("09FE");
+                    queueWrite("09FE");
                     break;
                 case 2:
-                    _queueWrite("09FD");
+                    queueWrite("09FD");
                     break;
             }
             tBarLedState = state;

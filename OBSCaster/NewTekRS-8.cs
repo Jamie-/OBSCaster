@@ -1,46 +1,37 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace OBSCaster {
 	class NewTekRS_8: NewtekController {
-		private SerialPort port;
 		private int[] buttonData = { 0,  0xff , 0xff , 0xff , 0x00, 0x00, 0x00, 0x00};
 		private int[] ledData = { 0xff, 0xff, 0xff };
-		private bool tBarLastAt255 = false;
+		private bool flipTbar = false;
 
-		private static Dictionary<int, string> OtherButtonLookup = new Dictionary<int, string>() {
-			{1, "FadeDSK" },
-			{2, "TakeDSK" },
-			{3, "DDR" },
-			{4, "Alt" },
-			{5, "Auto" },
-			{7, "Take" }
+		private static Dictionary<int, ConsoleEvent> OtherButtonLookup = new Dictionary<int, ConsoleEvent>() {
+			{1, ConsoleEvent.FADE_DSK},
+			{2, ConsoleEvent.TAKE_DSK},
+			{3, ConsoleEvent.DDR},
+			{4, ConsoleEvent.ALT},
+			{5, ConsoleEvent.AUTO},
+			{7, ConsoleEvent.TAKE},
 		};
 
-		public NewTekRS_8() {
-			Console.WriteLine("Created new NewTekRS_8 instance");
+		public NewTekRS_8(OutputHandler handler):base(115200) {
+			this.handler = handler;
 		}
 
 		public static string deviceName() {
 			return "Newtek RS-8";
         }
 
-		protected override void _connect(string serialPortName) {
-			port = new SerialPort(serialPortName);
-			port.BaudRate = 115200;
-			port.NewLine = "\r";
-			port.DataReceived += new SerialDataReceivedEventHandler(dataReceivedHandler);
-			port.Open();
-		}
+		protected override void _connect() { }
 
-		protected override void _disconnect() {
-			if (port.IsOpen) port.Close();
-		}
+		protected override void _disconnect() { }
 
 		public override bool supportsBacklight() {
 			return false;
@@ -50,23 +41,11 @@ namespace OBSCaster {
 			throw new NotImplementedException();
 		}
 
-		private void dataReceivedHandler(object sender, SerialDataReceivedEventArgs e) {
-			SerialPort sp = (SerialPort)sender;
-			string data = sp.ReadExisting();
-			//Console.WriteLine($"Data received: {data}");
-			var commands = data.Split('\r');
-			foreach (var command in commands) {
-				if (String.IsNullOrWhiteSpace(command)) continue;
-				//Console.WriteLine($"Command: {command}");
-				decodeCommand(command.Trim());
-			}
-		}
-
 		public void doSomething(string button) {
 			Console.WriteLine($"Button: {button}");
 		}
 
-		private void decodeCommand(string command) {
+		protected override void decodeCommand(string command) {
 			if (command.Length != 4) {
 				Console.WriteLine($"Invalid command from RS-8: {command}");
 				return;
@@ -85,13 +64,14 @@ namespace OBSCaster {
 					if ((~buttons & changedButtons & bit) > 0) {
 						//Console.WriteLine($"Bank {bank} Button {8 - i} pressed");
 						if (bank == 1) {
-							doSomething($"Pvw{8 - i}");
+							Console.WriteLine($"Pvw{8 - i}");
+							handler.dispatchEvent(ConsoleEvent.PREVIEW, 8 - i);
 						} else if (bank == 2) {
-							doSomething($"Pgm{8 - i}");
+							Console.WriteLine($"Pgm{8 - i}");
+							handler.dispatchEvent(ConsoleEvent.PROGRAM, 8 - i);
 						} else if (bank == 3) {
-							string b;
-							if (OtherButtonLookup.TryGetValue(8 - i, out b)) {
-								doSomething(b);
+							if (OtherButtonLookup.ContainsKey(8-i)) {
+								handler.dispatchEvent(OtherButtonLookup[8 - i], -1);
 							}
 						}
 					}
@@ -100,24 +80,28 @@ namespace OBSCaster {
 			if (bank==4) {
 				// T Bar
 				Console.WriteLine($"T-bar position: {buttons}");
-				if (buttons==255 || buttons == 0) {
+				if (buttons == 0 || buttons == 255) {
 					setOtherLED(Leds.UpT, false);
 					setOtherLED(Leds.DownT, false);
-				} else if (buttonData[4]==255 && buttons<255) {
+				} else if (flipTbar) {
 					setOtherLED(Leds.UpT, true);
 					setOtherLED(Leds.DownT, false);
-				} else if (buttonData[4]==0 && buttons > 0) {
+				} else {
 					setOtherLED(Leds.UpT, false);
 					setOtherLED(Leds.DownT, true);
 				}
+				// Flip TBar direction to always count 0-255
+				if (flipTbar) buttons = 255 - buttons;
+				if (buttons == 255) flipTbar = !flipTbar;
+				handler.dispatchEvent(ConsoleEvent.TBAR, buttons);
 			}
 			if (bank>4) {
 				// Rotary encoder
-				int change = buttons - buttonData[bank];
-				if (change == 255) change = -1;
-				if (change == -255) change = 1;
-				// TODO: figure out if overflow occured
-				Console.WriteLine($"Rotary encoder {bank} value changed by {change}");
+				if (bank == 5) {
+					handler.dispatchEvent(ConsoleEvent.KNOB1, buttons);
+				} else if (bank == 6) {
+					handler.dispatchEvent(ConsoleEvent.KNOB2, buttons);
+				}
 			}
 
 			buttonData[bank] = buttons;
@@ -135,15 +119,15 @@ namespace OBSCaster {
 					ledData[ledDataIndex] |= (1 << led) & 0xff;
 				}
 			}
-			port.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
+			queueWrite($"~{page:X1}{ledData[ledDataIndex]:X2}");
 			Console.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
 		}
 		public override void setLedProgram(int led, bool exclusive=true) {
-			setLED(led, 2, exclusive);
+			setLED(led+1, 2, exclusive);
 		}
 
 		public override void setLedPreview(int led, bool exclusive = true) {
-			setLED(led, 1, exclusive);
+			setLED(led+1, 1, exclusive);
 		}
 
 		// RS-8 doesn't have transition LEDs
@@ -154,6 +138,8 @@ namespace OBSCaster {
 		}
 
 		public void vegasStart() {
+			// TODO: fix this
+			SerialPort port = null;
 			new Thread(() => {
 				Thread.CurrentThread.IsBackground = true;
 				port.WriteLine($"~1FF");
