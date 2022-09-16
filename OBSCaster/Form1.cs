@@ -140,8 +140,7 @@ namespace OBSCaster {
         }
 
         // Connect and disconnect serial port
-        private void bConnect_Click(object sender, EventArgs e) {
-            Button bConnect = (Button) sender;
+        private void handleConnectButtons() {
             if (this.controller == null) {
                 MessageBox.Show("Controller type must be set to connect!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
@@ -149,14 +148,18 @@ namespace OBSCaster {
 
             if (connected) {
                 bConnect.Enabled = false;
+                ctxMenuConnect.Enabled = false;
                 this.controller.disconnect();
                 handler.disconnect();
                 connected = false;
                 bConnect.Text = "Connect";
+                ctxMenuConnect.Text = "Connect";
                 bConnect.Enabled = true;
+                ctxMenuConnect.Enabled = true;
                 tbSettingsConsoleType.Enabled = true;
             } else {
                 bConnect.Enabled = false;
+                ctxMenuConnect.Enabled = false;
                 tbSettingsConsoleType.Enabled = false;
                 try {
                     this.controller.connect();
@@ -165,6 +168,7 @@ namespace OBSCaster {
                         this.controller.disconnect();
                         tbSettingsConsoleType.Enabled = true;
                         bConnect.Enabled = true;
+                        ctxMenuConnect.Enabled = true;
                         return;
                     }
                     // Set backlight value after connect
@@ -172,13 +176,23 @@ namespace OBSCaster {
                         this.controller.setBacklight((int)tbSettingsBacklight.SelectedValue);
                     }
                     bConnect.Text = "Disconnect";
+                    ctxMenuConnect.Text = "Disconnect";
                     connected = true;
                 } catch (Exception ex) when (ex is System.IO.IOException || ex is NoSerialPortsFound) {
                     MessageBox.Show(ex.Message.ToString(), "Connection error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     tbSettingsConsoleType.Enabled = true;
                 }
                 bConnect.Enabled = true;
+                ctxMenuConnect.Enabled = true;
             }
+        }
+
+        private void bConnect_Click(object sender, EventArgs e) {
+            handleConnectButtons();
+        }
+
+        private void ctxMenuConnect_Click(object sender, EventArgs e) {
+            handleConnectButtons();
         }
     }
 }

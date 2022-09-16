@@ -33,7 +33,7 @@
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ctxMenuHeader = new System.Windows.Forms.ToolStripMenuItem();
-            this.ctxMenuDivider1 = new System.Windows.Forms.ToolStripSeparator();
+            this.ctxMenuDivider2 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxMenuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMenuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tbSettingsBacklight = new System.Windows.Forms.ComboBox();
@@ -49,6 +49,8 @@
             this.tbHandlerIp = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.ctxMenuDivider1 = new System.Windows.Forms.ToolStripSeparator();
+            this.ctxMenuConnect = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -67,34 +69,36 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ctxMenuHeader,
             this.ctxMenuDivider1,
+            this.ctxMenuConnect,
+            this.ctxMenuDivider2,
             this.ctxMenuSettings,
             this.ctxMenuExit});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(130, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 126);
             // 
             // ctxMenuHeader
             // 
             this.ctxMenuHeader.Enabled = false;
             this.ctxMenuHeader.Name = "ctxMenuHeader";
-            this.ctxMenuHeader.Size = new System.Drawing.Size(129, 22);
+            this.ctxMenuHeader.Size = new System.Drawing.Size(180, 22);
             this.ctxMenuHeader.Text = "OBSCaster";
             // 
-            // ctxMenuDivider1
+            // ctxMenuDivider2
             // 
-            this.ctxMenuDivider1.Name = "ctxMenuDivider1";
-            this.ctxMenuDivider1.Size = new System.Drawing.Size(126, 6);
+            this.ctxMenuDivider2.Name = "ctxMenuDivider2";
+            this.ctxMenuDivider2.Size = new System.Drawing.Size(177, 6);
             // 
             // ctxMenuSettings
             // 
             this.ctxMenuSettings.Name = "ctxMenuSettings";
-            this.ctxMenuSettings.Size = new System.Drawing.Size(129, 22);
+            this.ctxMenuSettings.Size = new System.Drawing.Size(180, 22);
             this.ctxMenuSettings.Text = "Settings";
             this.ctxMenuSettings.Click += new System.EventHandler(this.ctxMenuSettingsClick);
             // 
             // ctxMenuExit
             // 
             this.ctxMenuExit.Name = "ctxMenuExit";
-            this.ctxMenuExit.Size = new System.Drawing.Size(129, 22);
+            this.ctxMenuExit.Size = new System.Drawing.Size(180, 22);
             this.ctxMenuExit.Text = "Exit";
             this.ctxMenuExit.Click += new System.EventHandler(this.ctxMenuExit_Click);
             // 
@@ -228,6 +232,18 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "IP";
             // 
+            // ctxMenuDivider1
+            // 
+            this.ctxMenuDivider1.Name = "ctxMenuDivider1";
+            this.ctxMenuDivider1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // ctxMenuConnect
+            // 
+            this.ctxMenuConnect.Name = "ctxMenuConnect";
+            this.ctxMenuConnect.Size = new System.Drawing.Size(180, 22);
+            this.ctxMenuConnect.Text = "Connect";
+            this.ctxMenuConnect.Click += new System.EventHandler(this.ctxMenuConnect_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -256,7 +272,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem ctxMenuSettings;
         private System.Windows.Forms.ToolStripMenuItem ctxMenuExit;
-        private System.Windows.Forms.ToolStripSeparator ctxMenuDivider1;
+        private System.Windows.Forms.ToolStripSeparator ctxMenuDivider2;
         private System.Windows.Forms.ToolStripMenuItem ctxMenuHeader;
         private System.Windows.Forms.ComboBox tbSettingsBacklight;
         private System.Windows.Forms.Label label1;
@@ -271,6 +287,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown tbHandlerPort;
         private System.Windows.Forms.Button bConnect;
+        private System.Windows.Forms.ToolStripSeparator ctxMenuDivider1;
+        private System.Windows.Forms.ToolStripMenuItem ctxMenuConnect;
     }
 }
 
