@@ -72,9 +72,11 @@ namespace OBSCaster {
 
         // Handle exit
         private void ctxMenuExit_Click(object sender, EventArgs e) {
-            if (this.controller != null && this.controller.IsConnected()) {
+            if (connected) {
                 Console.WriteLine("Disconnecting before shutdown...");
-                this.controller.disconnect();
+                controller.disconnect();
+                handler.disconnect();
+                connected = false;
             }
             notifyIcon1.Dispose();
             Application.Exit();
