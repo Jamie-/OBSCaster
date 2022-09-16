@@ -171,8 +171,8 @@ namespace OBSCaster {
                     }
                     bConnect.Text = "Disconnect";
                     connected = true;
-                } catch (System.IO.IOException ex) {
-                    MessageBox.Show(ex.Message.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                } catch (Exception ex) when (ex is System.IO.IOException || ex is NoSerialPortsFound) {
+                    MessageBox.Show(ex.Message.ToString(), "Connection error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     tbSettingsConsoleType.Enabled = true;
                 }
                 bConnect.Enabled = true;

@@ -8,7 +8,8 @@ using System.Collections.Concurrent;
 namespace OBSCaster {
 
     public class NoSerialPortsFound : Exception {
-
+        public NoSerialPortsFound() : base("No serial ports found") { }
+        public NoSerialPortsFound(string message) : base(message) { }
     }
 
     abstract class NewtekController {
