@@ -194,5 +194,10 @@ namespace OBSCaster {
         private void ctxMenuConnect_Click(object sender, EventArgs e) {
             handleConnectButtons();
         }
-    }
+
+		private void settingsButton_Click(object sender, EventArgs e) {
+            var buttonConfig = new ButtonConfig(new string[] { "OPT1", "OPT2", "DDR", "ALT", "FADE_DSK", "TAKE_DSK" });
+            buttonConfig.Show();
+		}
+	}
 }
