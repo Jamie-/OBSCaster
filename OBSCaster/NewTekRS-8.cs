@@ -120,7 +120,7 @@ namespace OBSCaster {
 				}
 			}
 			queueWrite($"~{page:X1}{ledData[ledDataIndex]:X2}");
-			Console.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
+			//Console.WriteLine($"~{page:X1}{ledData[ledDataIndex]:X2}");
 		}
 		public override void setLedProgram(int led, bool exclusive=true) {
 			setLED(led+1, 2, exclusive);

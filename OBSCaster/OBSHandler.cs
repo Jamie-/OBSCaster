@@ -5,6 +5,8 @@ using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
 using System.Threading;
 using System.Linq;
+using Loupedeck.SymetrixPlugin;
+using System.Diagnostics;
 
 namespace OBSCaster {
     class OBSHandler : OutputHandler {
@@ -13,6 +15,19 @@ namespace OBSCaster {
         private List<string> sceneList;
         // Knobs state
         private int[] knobState = new int[] { 0, 0, 0 };
+
+        private SymetrixInterface symetrix;
+        private Thread symetrixThread;
+        private bool symetrixThreadRun = true;
+
+        private bool fadeDSKIndicator = false;
+        private bool takeDSKIndicator = false;
+        private bool DDRIndicator = false;
+        private bool ALTIndicator = false;
+
+        private int lastKnob1 = 0;
+        private int lastKnob2 = 0;
+        private int lastKnob3 = 0;
 
         public OBSHandler() {
             obs = new OBSWebsocket();
@@ -23,6 +38,36 @@ namespace OBSCaster {
             obs.SceneListChanged += onScenesChanged;
             obs.TransitionBegin += onTransitionBegin;
             obs.TransitionEnd += onTransitionEnd;
+
+            this.symetrix = new SymetrixInterface();
+            this.symetrix.connect();
+
+            this.symetrixThread = new Thread(this.symextrixRXThread);
+            this.symetrixThread.Start();
+        }
+
+        private void symextrixRXThread() {
+            Debug.WriteLine("Starting Symetrix RX Thread");
+			while (symetrixThreadRun) {
+                Thread.Sleep(500);
+                fadeDSKIndicator = symetrix.getControl(1) > 0 ? true : false;
+				takeDSKIndicator = symetrix.getControl(2) > 0 ? true : false;
+				DDRIndicator = symetrix.getControl(3) > 0 ? true : false;
+				ALTIndicator = symetrix.getControl(4) > 0 ? true : false;
+
+				NewTekRS_8 rs8 = (NewTekRS_8)this.controller;
+				rs8.setOtherLED(NewTekRS_8.Leds.FadeDSK, !fadeDSKIndicator);
+				rs8.setOtherLED(NewTekRS_8.Leds.TakeDSK, !takeDSKIndicator);
+				rs8.setOtherLED(NewTekRS_8.Leds.DDR, !DDRIndicator);
+				rs8.setOtherLED(NewTekRS_8.Leds.ALT, !ALTIndicator);
+
+                if (obs.IsConnected) {
+                    var obsStatus = obs.GetStreamingStatus();
+                    rs8.setOtherLED(NewTekRS_8.Leds.UpT, obsStatus.IsStreaming);
+					rs8.setOtherLED(NewTekRS_8.Leds.DownT, obsStatus.IsRecording);
+				}
+            }
+            Debug.WriteLine("Symetrix RX Thread exiting");
         }
 
         public override bool connect(string ip, int port, string password) {
@@ -52,6 +97,7 @@ namespace OBSCaster {
 
         public override void disconnect() {
             obs.Disconnect();
+            this.symetrixThreadRun = false;
         }
 
         // Update the sceneList cache
@@ -85,24 +131,47 @@ namespace OBSCaster {
                         obs.TransitionToProgram();
                         break;
                     case ConsoleEvent.TAKE:
-                        TransitionSettings oldTransition = obs.GetCurrentTransition();
+						obs.TransitionToProgram();
+						break;
+						TransitionSettings oldTransition = obs.GetCurrentTransition();
                         obs.TransitionToProgram(transitionName: "Cut");
                         Thread.Sleep(50);  // OBS needs at least 1 frame between cut and change
                         obs.SetCurrentTransition(oldTransition.Name);
                         break;
                     case ConsoleEvent.KNOB1:
                         // Change selected transition
-                        delta = (value + 128) % 256 - (knobState[0] + 128) % 256;
-                        incrSelectedTransition(delta);
-                        knobState[0] = value;
+                        //delta = (value + 128) % 256 - (knobState[0] + 128) % 256;
+                        //var delta2 = delta - lastKnob1;
+                        //this.symetrix.setControlRelative(4,Math.Abs(delta2 * -100),(delta2 > 0) ? true : false);
+                        //Console.WriteLine(delta2);
+                        //lastKnob1 = delta;
                         break;
                     case ConsoleEvent.KNOB2:
                         // Change selected transition duration
-                        delta = (value + 128) % 256 - (knobState[1] + 128) % 256;
-                        incrTransitionDuration(delta);
-                        knobState[1] = value;
+      //                  delta = (value + 128) % 256 - (knobState[1] + 128) % 256;
+						//var delta2_ = delta - lastKnob2;
+						//this.symetrix.setControlRelative(5, Math.Abs(delta2_ * -100), (delta2_ > 0) ? true : false);
+						//this.symetrix.setControlRelative(6, Math.Abs(delta2_ * -100), (delta2_ > 0) ? true : false);
+      //                  Console.WriteLine(delta2_);
+      //                  lastKnob2 = delta;
+						break;
+                    case ConsoleEvent.FADE_DSK:
+                        fadeDSKIndicator = !fadeDSKIndicator;
+                        this.symetrix.setControl(1, fadeDSKIndicator ? 65535 : 0);
                         break;
-                }
+                    case ConsoleEvent.TAKE_DSK:
+						takeDSKIndicator = !takeDSKIndicator;
+						this.symetrix.setControl(2, takeDSKIndicator ? 65535 : 0);
+						break;
+                    case ConsoleEvent.DDR:
+						DDRIndicator = !DDRIndicator;
+						this.symetrix.setControl(3, DDRIndicator ? 65535 : 0);
+						break;
+                    case ConsoleEvent.ALT:
+						ALTIndicator = !ALTIndicator;
+						this.symetrix.setControl(1, ALTIndicator ? 65535 : 0);
+						break;
+				}
             } catch (ErrorResponseException err) {
                 Console.WriteLine($"ERROR FROM OBS: {err.Message}");
             }

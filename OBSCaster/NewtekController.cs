@@ -4,7 +4,6 @@ using System.IO.Ports;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-
 namespace OBSCaster {
 
     public class NoSerialPortsFound : Exception {
@@ -28,7 +27,8 @@ namespace OBSCaster {
         protected NewtekController(int baudRate) {
             this.baudRate = baudRate;
             writeQueue = new ConcurrentQueue<string>();
-        }
+			wakeWrite = new EventWaitHandle(false, EventResetMode.ManualReset);
+		}
 
         // Connect to serial port
         public void connect() {
@@ -38,7 +38,7 @@ namespace OBSCaster {
                 if (ports.Count > 1) {
                     Console.WriteLine("WARNING: More than one serial port for IDs found!");
                 }
-                port = new SerialPort(ports[0]);
+                port = new SerialPort(ports.Last());
                 port.BaudRate = baudRate;
                 port.ReadTimeout = 500;
                 port.WriteTimeout = 500;
@@ -57,7 +57,6 @@ namespace OBSCaster {
             // TODO: implement alternative to .Clear()
             // .Clear() only added in .NET 5
             // writeQueue.Clear();
-            wakeWrite = new EventWaitHandle(false, EventResetMode.ManualReset);
             readThread.Start();
             writeThread.Start();
         }
@@ -144,5 +143,8 @@ namespace OBSCaster {
         public abstract void setLedPreview(int idx, bool exclusive = true);
 
         public abstract void setTransitionsLeds(bool state);
-    }
+
+        
+
+	}
 }
